@@ -171,10 +171,6 @@ setup_macos_optional_programs() {
             fi
         else
             echo "✅ $program already installed"
-            if [[ "$UPDATE_EXISTING" == "true" ]]; then
-                echo "🔄 Updating $program..."
-                brew upgrade --cask "$program" || echo "⚠️  Update failed for $program"
-            fi
         fi
     done
     
