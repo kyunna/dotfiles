@@ -63,7 +63,7 @@ reload_shell_env() {
         esac
 
         if [ -n "$shell_rc" ] && [ -f "$shell_rc" ]; then
-            echo "🔄 Reloading shell environment..."
+            echo "🔄 Reloading shell environment...."
             source "$shell_rc"
         fi
     fi
@@ -150,6 +150,24 @@ setup_macos_defaults() {
 
     # Restart Dock to apply changes
     killall Dock
+}
+
+setup_macos_optional_programs() {
+    echo "📦 Installing optional programs..."
+    
+    for program in "$@"; do
+        if [[ " ${MACOS_OPTIONAL_PROGRAMS[@]} " =~ " ${program} " ]]; then
+            if ! brew list --cask "$program" >/dev/null 2>&1; then
+                echo "⚙️  Installing $program..."
+                brew install --cask "$program"
+                echo "✅ $program installation completed"
+            else
+                echo "✅ $program already installed"
+            fi
+        else
+            echo "⚠️  Unknown program: $program"
+        fi
+    done
 }
 
 setup_linux_optional_programs() {
