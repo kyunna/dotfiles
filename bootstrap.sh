@@ -45,6 +45,30 @@ case "${OS}" in
         ;;
 esac
 
+reload_shell_env() {
+    if [ "$(uname)" = "Darwin" ]; then
+        if [ -f "$HOME/.zprofile" ]; then
+            echo "🔄 Reloading shell environment..."
+            source "$HOME/.zprofile"
+        fi
+    else
+        current_shell=$(basename "$SHELL")
+        case "$current_shell" in
+            "zsh")
+                shell_rc="$HOME/.zshrc"
+                ;;
+            "bash")
+                shell_rc="$HOME/.bashrc"
+                ;;
+        esac
+
+        if [ -n "$shell_rc" ] && [ -f "$shell_rc" ]; then
+            echo "🔄 Reloading shell environment..."
+            source "$shell_rc"
+        fi
+    fi
+}
+
 install_homebrew() {
     echo "📦 Checking Homebrew installation..."
     if ! command -v brew >/dev/null 2>&1; then
@@ -55,7 +79,7 @@ install_homebrew() {
         eval "$(/opt/homebrew/bin/brew shellenv)"
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 
-        source ~/.zprofile
+        reload_shell_env
         echo "✅ Homebrew installation completed"
     else
         echo "✅ Homebrew is already installed"
@@ -73,6 +97,7 @@ install_basic_utils() {
                 echo "✅ $util already installed"
             fi
         done
+        reload_shell_env
     else
         if ! sudo -v; then
             echo "❌ sudo access is required to install packages on Linux"
@@ -87,6 +112,7 @@ install_basic_utils() {
         elif [ -f /etc/fedora-release ]; then
             sudo dnf install -y "${BASIC_UTILS[@]}"
         fi
+        reload_shell_env
     fi
 }
 
@@ -126,30 +152,11 @@ setup_macos_defaults() {
     killall Dock
 }
 
-setup_macos_optional_programs() {
-    echo "📦 Checking optional programs..."
-    for program in "${MACOS_OPTIONAL_PROGRAMS[@]}"; do
-        if ! brew list --cask "$program" >/dev/null 2>&1; then
-            echo "❓ Would you like to install $program? (y/n)"
-            read -r response
-            if [ "$response" = "y" ]; then
-                echo "⚙️  Installing $program..."
-                brew install --cask "$program"
-            else
-                echo "⏩ Skipping $program installation"
-            fi
-        else
-            echo "✅ $program already installed"
-        fi
-    done
-}
-
 setup_linux_optional_programs() {
-    echo "📦 Checking optional programs..."
-    for program in "${LINUX_OPTIONAL_PROGRAMS[@]}"; do
-        echo "❓ Would you like to install $program? (y/n)"
-        read -r response
-        if [ "$response" = "y" ]; then
+    echo "📦 Installing optional programs..."
+
+    for program in "$@"; do
+        if [[ " ${LINUX_OPTIONAL_PROGRAMS[@]} " =~ " ${program} " ]]; then
             echo "⚙️  Installing $program..."
             case "$program" in
                 "nordvpn")
@@ -158,10 +165,11 @@ setup_linux_optional_programs() {
                     elif [ -f /etc/arch-release ]; then
                         yay -S nordvpn-bin
                     fi
+                    echo "✅ $program installation completed"
                     ;;
             esac
         else
-            echo "⏩ Skipping $program installation"
+            echo "⚠️  Unknown program: $program"
         fi
     done
 }
