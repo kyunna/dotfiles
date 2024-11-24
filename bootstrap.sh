@@ -144,30 +144,46 @@ setup_macos_defaults() {
 
     # Setup Dock
     echo "🖥️  Configuring Dock..."
-    # Enable auto-hide
-    defaults write com.apple.dock autohide -bool true
-    echo "✅ Dock settings configured"
-
-    # Restart Dock to apply changes
-    killall Dock
+    # Check current autohide setting
+    current_autohide=$(defaults read com.apple.dock autohide 2>/dev/null)
+    if [ "$current_autohide" = "1" ]; then
+        echo "✅ Dock auto-hide already enabled"
+    else
+        # Enable auto-hide
+        defaults write com.apple.dock autohide -bool true
+        echo "✅ Dock auto-hide enabled"
+        
+        # Restart Dock to apply changes
+        killall Dock
+    fi
 }
 
 setup_macos_optional_programs() {
     echo "📦 Installing optional programs..."
     
     for program in "$@"; do
-        if [[ " ${MACOS_OPTIONAL_PROGRAMS[@]} " =~ " ${program} " ]]; then
+        if printf '%s\n' "${MACOS_OPTIONAL_PROGRAMS[@]}" | grep -Fxq "$program"; then
             if ! brew list --cask "$program" >/dev/null 2>&1; then
                 echo "⚙️  Installing $program..."
-                brew install --cask "$program"
-                echo "✅ $program installation completed"
+                if brew install --cask "$program"; then
+                    echo "✅ $program installation completed"
+                else
+                    echo "❌ Failed to install $program"
+                fi
             else
                 echo "✅ $program already installed"
+                if [[ "$UPDATE_EXISTING" == "true" ]]; then
+                    echo "🔄 Updating $program..."
+                    brew upgrade --cask "$program" || echo "⚠️  Update failed for $program"
+                fi
             fi
         else
             echo "⚠️  Unknown program: $program"
+            echo "Available programs: ${MACOS_OPTIONAL_PROGRAMS[*]}"
         fi
     done
+    
+    echo -e "\n📋 Installation completed"
 }
 
 setup_linux_optional_programs() {
