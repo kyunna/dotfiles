@@ -146,16 +146,15 @@ setup_macos_defaults() {
     # Setup Dock
     echo "🖥️  Configuring Dock..."
     # Check current autohide setting
-    current_autohide=$(defaults read com.apple.dock autohide 2>/dev/null)
-    if [ "$current_autohide" = "1" ]; then
-        echo "✅ Dock auto-hide already enabled"
-    else
+    current_autohide=$(defaults read com.apple.dock autohide 2>/dev/null || echo "")
+    if [ -z "$current_autohide" ] || [ "$current_autohide" = "0" ]; then
         # Enable auto-hide
         defaults write com.apple.dock autohide -bool true
         echo "✅ Dock auto-hide enabled"
-        
         # Restart Dock to apply changes
         killall Dock
+    else
+        echo "✅ Dock auto-hide already enabled"
     fi
 }
 
