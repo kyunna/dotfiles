@@ -161,25 +161,20 @@ setup_macos_defaults() {
 setup_macos_optional_programs() {
     echo "📦 Installing optional programs..."
     
-    for program in "$@"; do
-        if printf '%s\n' "${MACOS_OPTIONAL_PROGRAMS[@]}" | grep -Fxq "$program"; then
-            if ! brew list --cask "$program" >/dev/null 2>&1; then
-                echo "⚙️  Installing $program..."
-                if brew install --cask "$program"; then
-                    echo "✅ $program installation completed"
-                else
-                    echo "❌ Failed to install $program"
-                fi
+    for program in "${MACOS_OPTIONAL_PROGRAMS[@]}"; do
+        if ! brew list --cask "$program" >/dev/null 2>&1; then
+            echo "⚙️  Installing $program..."
+            if brew install --cask "$program"; then
+                echo "✅ $program installation completed"
             else
-                echo "✅ $program already installed"
-                if [[ "$UPDATE_EXISTING" == "true" ]]; then
-                    echo "🔄 Updating $program..."
-                    brew upgrade --cask "$program" || echo "⚠️  Update failed for $program"
-                fi
+                echo "❌ Failed to install $program"
             fi
         else
-            echo "⚠️  Unknown program: $program"
-            echo "Available programs: ${MACOS_OPTIONAL_PROGRAMS[*]}"
+            echo "✅ $program already installed"
+            if [[ "$UPDATE_EXISTING" == "true" ]]; then
+                echo "🔄 Updating $program..."
+                brew upgrade --cask "$program" || echo "⚠️  Update failed for $program"
+            fi
         fi
     done
     
@@ -189,22 +184,18 @@ setup_macos_optional_programs() {
 setup_linux_optional_programs() {
     echo "📦 Installing optional programs..."
 
-    for program in "$@"; do
-        if [[ " ${LINUX_OPTIONAL_PROGRAMS[@]} " =~ " ${program} " ]]; then
-            echo "⚙️  Installing $program..."
-            case "$program" in
-                "nordvpn")
-                    if [ -f /etc/debian_version ]; then
-                        curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh | sh
-                    elif [ -f /etc/arch-release ]; then
-                        yay -S nordvpn-bin
-                    fi
-                    echo "✅ $program installation completed"
-                    ;;
-            esac
-        else
-            echo "⚠️  Unknown program: $program"
-        fi
+    for program in "${LINUX_OPTIONAL_PROGRAMS[@]}"; do
+        echo "⚙️  Installing $program..."
+        case "$program" in
+            nordvpn)
+                if [ -f /etc/debian_version ]; then
+                    curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh | sh
+                elif [ -f /etc/arch-release ]; then
+                    yay -S nordvpn-bin
+                fi
+                echo "✅ $program installation completed"
+                ;;
+        esac
     done
 }
 
