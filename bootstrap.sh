@@ -19,6 +19,7 @@ MACOS_OPTIONAL_PROGRAMS=(
     "raycast"
     "scroll-reverser"
     "heynote"
+    "font-jetbrains-mono-nerd-font"
 )
 
 # Optional programs for Linux
