@@ -24,7 +24,7 @@ OPTIONAL_PROGRAMS=(
 )
 
 install_homebrew() {
-    echo "📦 Checking Homebrew installation..."
+    echo "📦  Checking Homebrew installation..."
     if ! command -v brew >/dev/null 2>&1; then
         echo "⚙️ Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -120,27 +120,21 @@ setup_optional_programs() {
     local exit_status=0
     local current_os
     
-    # Determine current OS
     if [ "$(uname -s)" = "Darwin" ]; then
         current_os="macos"
     else
         current_os="linux"
     fi
     
-    # Filter and install programs for current OS
     for program_info in "${OPTIONAL_PROGRAMS[@]}"; do
-        local program="${program_info%%:*}"          # 프로그램 이름
-        local supported_os="${program_info#*:}"      # 지원하는 OS 목록
+        local program="${program_info%%:*}"
+        local supported_os="${program_info#*:}"
         
-        # Check if current OS is supported
         if [[ $supported_os == *"$current_os"* ]]; then
-            echo "⚙️  Installing $program..."
-            
             if [ "$current_os" = "macos" ]; then
                 if ! brew list --cask "$program" >/dev/null 2>&1; then
-                    if brew install --cask "$program"; then
-                        echo "✅ $program installation completed"
-                    else
+                    echo "⚙️  Installing $program..."
+                    if ! brew install --cask "$program"; then
                         echo "❌ Failed to install $program"
                         exit_status=1
                     fi
@@ -150,6 +144,7 @@ setup_optional_programs() {
             else
                 case "$program" in
                     nordvpn)
+                        echo "⚙️  Installing $program..."
                         if [ -f /etc/debian_version ]; then
                             curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh | sh || exit_status=$?
                         elif [ -f /etc/arch-release ]; then
