@@ -39,41 +39,6 @@ install_homebrew() {
     fi
 }
 
-install_basic_utils() {
-    echo "🛠️ Installing basic utilities..."
-    local exit_status=0
-
-    if [ "$(uname -s)" = "Darwin" ]; then
-        # Update Homebrew and formulae
-        echo "🔄 Updating Homebrew..."
-        brew update
-        
-        for util in "${BASIC_UTILS[@]}"; do
-            if ! command -v "$util" >/dev/null 2>&1; then
-                echo "⚙️  Installing $util..."
-                brew install "$util" || exit_status=$?
-            else
-                echo "✅ $util already installed"
-            fi
-        done
-        
-        # Cleanup outdated versions and caches
-        echo "🧹 Cleaning up Homebrew files..."
-        brew cleanup
-    else
-        if [ -f /etc/arch-release ]; then
-            sudo pacman -S --noconfirm "${BASIC_UTILS[@]}" || exit_status=$?
-        elif [ -f /etc/debian_version ]; then
-            sudo apt-get update || exit_status=$?
-            [ $exit_status -eq 0 ] && sudo apt-get install -y "${BASIC_UTILS[@]}" || exit_status=$?
-        elif [ -f /etc/fedora-release ]; then
-            sudo dnf install -y "${BASIC_UTILS[@]}" || exit_status=$?
-        fi
-    fi
-
-    return $exit_status
-}
-
 setup_macos_defaults() {
     echo "🔧 Configuring macOS defaults..."
     local exit_status=0
@@ -110,6 +75,41 @@ setup_macos_defaults() {
         killall Dock
     else
         echo "✅ Dock auto-hide already enabled"
+    fi
+
+    return $exit_status
+}
+
+install_basic_utils() {
+    echo "🛠️ Installing basic utilities..."
+    local exit_status=0
+
+    if [ "$(uname -s)" = "Darwin" ]; then
+        # Update Homebrew and formulae
+        echo "🔄 Updating Homebrew..."
+        brew update
+        
+        for util in "${BASIC_UTILS[@]}"; do
+            if ! command -v "$util" >/dev/null 2>&1; then
+                echo "⚙️  Installing $util..."
+                brew install "$util" || exit_status=$?
+            else
+                echo "✅ $util already installed"
+            fi
+        done
+        
+        # Cleanup outdated versions and caches
+        echo "🧹 Cleaning up Homebrew files..."
+        brew cleanup
+    else
+        if [ -f /etc/arch-release ]; then
+            sudo pacman -S --noconfirm "${BASIC_UTILS[@]}" || exit_status=$?
+        elif [ -f /etc/debian_version ]; then
+            sudo apt-get update || exit_status=$?
+            [ $exit_status -eq 0 ] && sudo apt-get install -y "${BASIC_UTILS[@]}" || exit_status=$?
+        elif [ -f /etc/fedora-release ]; then
+            sudo dnf install -y "${BASIC_UTILS[@]}" || exit_status=$?
+        fi
     fi
 
     return $exit_status
@@ -181,6 +181,7 @@ main() {
 
     if [ "$(uname -s)" = "Darwin" ]; then
         install_homebrew || exit_status=$?
+        [ $exit_status -eq 0 ] && setup_macos_defaults || exit_status=$?
     fi
 
     [ $exit_status -eq 0 ] && install_basic_utils || exit_status=$?
