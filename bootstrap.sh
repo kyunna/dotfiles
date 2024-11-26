@@ -28,27 +28,6 @@ LINUX_OPTIONAL_PROGRAMS=(
     "nordvpn"
 )
 
-# Check OS compatibility
-check_os() {
-    OS="$(uname -s)"
-    case "${OS}" in
-        Darwin*)
-            echo "✅ macOS detected"
-            ;;
-        Linux*)
-            if [ ! -f /etc/arch-release ] && [ ! -f /etc/debian_version ] && [ ! -f /etc/fedora-release ]; then
-                echo "❌ Unsupported Linux distribution"
-                exit 1
-            fi
-            echo "✅ Linux detected: $(cat /etc/os-release | grep PRETTY_NAME | cut -d '=' -f 2 | tr -d '"')"
-            ;;
-        *)
-            echo "❌ Unsupported operating system: ${OS}"
-            exit 1
-            ;;
-    esac
-}
-
 # Check sudo permission
 check_sudo() {
     echo "🔐 Checking sudo privileges..."
@@ -61,7 +40,7 @@ check_sudo() {
 }
 
 reload_shell_env() {
-    if [ "$(uname)" = "Darwin" ]; then
+    if [ "$(uname -s)" = "Darwin" ]; then
         if [ -f "$HOME/.zprofile" ]; then
             echo "🔄 Reloading shell environment..."
             source "$HOME/.zprofile"
@@ -105,7 +84,11 @@ install_basic_utils() {
     echo "🛠️  Installing basic utilities..."
     local exit_status=0
 
-    if [ "$(uname)" = "Darwin" ]; then
+    if [ "$(uname -s)" = "Darwin" ]; then
+        # Update Homebrew and formulae
+        echo "🔄 Updating Homebrew..."
+        brew update
+        
         for util in "${BASIC_UTILS[@]}"; do
             if ! command -v "$util" >/dev/null 2>&1; then
                 echo "⚙️  Installing $util..."
@@ -114,6 +97,10 @@ install_basic_utils() {
                 echo "✅ $util already installed"
             fi
         done
+        
+        # Cleanup outdated versions and caches
+        echo "🧹 Cleaning up Homebrew files..."
+        brew cleanup
     else
         if [ -f /etc/arch-release ]; then
             sudo pacman -S --noconfirm "${BASIC_UTILS[@]}" || exit_status=$?
@@ -229,17 +216,16 @@ main() {
     local exit_status=0
 
     echo "🚀 Starting system bootstrap..."
-    
-    check_os || exit 1
+
     check_sudo || exit 1
 
-    if [ "$(uname)" = "Darwin" ]; then
+    if [ "$(uname -s)" = "Darwin" ]; then
         install_homebrew || exit_status=$?
     fi
 
     [ $exit_status -eq 0 ] && install_basic_utils || exit_status=$?
 
-    if [ "$(uname)" = "Darwin" ] && [ $exit_status -eq 0 ]; then
+    if [ "$(uname -s)" = "Darwin" ] && [ $exit_status -eq 0 ]; then
         setup_macos_defaults || exit_status=$?
         setup_macos_optional_programs || exit_status=$?
     elif [ $exit_status -eq 0 ]; then
