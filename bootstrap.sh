@@ -39,30 +39,6 @@ check_sudo() {
     while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
 }
 
-reload_shell_env() {
-    if [ "$(uname -s)" = "Darwin" ]; then
-        if [ -f "$HOME/.zprofile" ]; then
-            echo "🔄 Reloading shell environment..."
-            source "$HOME/.zprofile"
-        fi
-    else
-        current_shell=$(basename "$SHELL")
-        case "$current_shell" in
-            "zsh")
-                shell_rc="$HOME/.zshrc"
-                ;;
-            "bash")
-                shell_rc="$HOME/.bashrc"
-                ;;
-        esac
-
-        if [ -n "$shell_rc" ] && [ -f "$shell_rc" ]; then
-            echo "🔄 Reloading shell environment...."
-            source "$shell_rc"
-        fi
-    fi
-}
-
 install_homebrew() {
     echo "📦 Checking Homebrew installation..."
     if ! command -v brew >/dev/null 2>&1; then
@@ -73,7 +49,6 @@ install_homebrew() {
         eval "$(/opt/homebrew/bin/brew shellenv)"
         echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> ~/.zprofile
 
-        reload_shell_env
         echo "✅ Homebrew installation completed"
     else
         echo "✅ Homebrew is already installed"
