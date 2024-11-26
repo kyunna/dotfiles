@@ -12,21 +12,24 @@ BASIC_UTILS=(
     "chezmoi"
 )
 
-# Optional programs for macOS
-MACOS_OPTIONAL_PROGRAMS=(
-    "1password"
-    "nordvpn"
-    "raycast"
-    "scroll-reverser"
-    "heynote"
-    "font-jetbrains-mono-nerd-font"
-    "font-pretendard"
-)
+# Optional programs setting for OS
+OPTIONAL_PROGRAMS=()
 
-# Optional programs for Linux
-LINUX_OPTIONAL_PROGRAMS=(
-    "nordvpn"
-)
+if [ "$(uname -s)" = "Darwin" ]; then
+    OPTIONAL_PROGRAMS=(
+        "1password"
+        "nordvpn"
+        "raycast"
+        "scroll-reverser"
+        "heynote"
+        "font-jetbrains-mono-nerd-font"
+        "font-pretendard"
+    )
+else
+    OPTIONAL_PROGRAMS=(
+        "nordvpn"
+    )
+fi
 
 # Check sudo permission
 check_sudo() {
@@ -131,44 +134,39 @@ setup_macos_defaults() {
     return $exit_status
 }
 
-setup_macos_optional_programs() {
+setup_optional_programs() {
     echo "📦 Installing optional programs..."
     local exit_status=0
     
-    for program in "${MACOS_OPTIONAL_PROGRAMS[@]}"; do
-        if ! brew list --cask "$program" >/dev/null 2>&1; then
-            echo "⚙️ Installing $program..."
-            if brew install --cask "$program"; then
-                echo "✅ $program installation completed"
-            else
-                echo "❌ Failed to install $program"
-                exit_status=1
-            fi
-        else
-            echo "✅ $program already installed"
-        fi
-    done
-    
-    return $exit_status
-}
-
-setup_linux_optional_programs() {
-    echo "📦 Installing optional programs..."
-    local exit_status=0
-
-    for program in "${LINUX_OPTIONAL_PROGRAMS[@]}"; do
-        echo "⚙️ Installing $program..."
-        case "$program" in
-            nordvpn)
-                if [ -f /etc/debian_version ]; then
-                    curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh | sh || exit_status=$?
-                elif [ -f /etc/arch-release ]; then
-                    yay -S nordvpn-bin || exit_status=$?
+    if [ "$(uname -s)" = "Darwin" ]; then
+        for program in "${OPTIONAL_PROGRAMS[@]}"; do
+            if ! brew list --cask "$program" >/dev/null 2>&1; then
+                echo "⚙️  Installing $program..."
+                if brew install --cask "$program"; then
+                    echo "✅ $program installation completed"
+                else
+                    echo "❌ Failed to install $program"
+                    exit_status=1
                 fi
-                ;;
-        esac
-    done
-
+            else
+                echo "✅ $program already installed"
+            fi
+        done
+    else
+        for program in "${OPTIONAL_PROGRAMS[@]}"; do
+            echo "⚙️  Installing $program..."
+            case "$program" in
+                nordvpn)
+                    if [ -f /etc/debian_version ]; then
+                        curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh | sh || exit_status=$?
+                    elif [ -f /etc/arch-release ]; then
+                        yay -S nordvpn-bin || exit_status=$?
+                    fi
+                    ;;
+            esac
+        done
+    fi
+    
     return $exit_status
 }
 
@@ -191,7 +189,7 @@ main() {
     local exit_status=0
 
     echo "🚀 Starting system bootstrap..."
-
+    
     check_sudo || exit 1
 
     if [ "$(uname -s)" = "Darwin" ]; then
@@ -199,14 +197,7 @@ main() {
     fi
 
     [ $exit_status -eq 0 ] && install_basic_utils || exit_status=$?
-
-    if [ "$(uname -s)" = "Darwin" ] && [ $exit_status -eq 0 ]; then
-        setup_macos_defaults || exit_status=$?
-        setup_macos_optional_programs || exit_status=$?
-    elif [ $exit_status -eq 0 ]; then
-        setup_linux_optional_programs || exit_status=$?
-    fi
-
+    [ $exit_status -eq 0 ] && setup_optional_programs || exit_status=$?
     [ $exit_status -eq 0 ] && setup_dotfiles || exit_status=$?
 
     if [ $exit_status -eq 0 ]; then
