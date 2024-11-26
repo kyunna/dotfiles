@@ -189,7 +189,7 @@ main() {
 
     if [ $exit_status -eq 0 ]; then
         echo "🎉 System bootstrap completed!"
-        echo "Please restart terminal to apply all changes."
+        echo "Terminal restart is required to apply all changes."
         exit 0
     else
         echo "❌ Setup failed with status $exit_status"
