@@ -23,17 +23,6 @@ OPTIONAL_PROGRAMS=(
     "font-pretendard:macos"
 )
 
-# Check sudo permission
-check_sudo() {
-    echo "🔐 Checking sudo privileges..."
-    if ! sudo -v; then
-        echo "❌ sudo access is required"
-        exit 1
-    fi
-    # Keep sudo privilege
-    while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null &
-}
-
 install_homebrew() {
     echo "📦 Checking Homebrew installation..."
     if ! command -v brew >/dev/null 2>&1; then
@@ -191,11 +180,9 @@ setup_dotfiles() {
 }
 
 main() {
-    local exit_status=0
-
     echo "🚀 Starting system bootstrap..."
     
-    check_sudo || exit 1
+    local exit_status=0
 
     if [ "$(uname -s)" = "Darwin" ]; then
         install_homebrew || exit_status=$?
