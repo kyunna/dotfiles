@@ -66,7 +66,7 @@ reload_shell_env() {
 install_homebrew() {
     echo "📦 Checking Homebrew installation..."
     if ! command -v brew >/dev/null 2>&1; then
-        echo "⚙️  Installing Homebrew..."
+        echo "⚙️ Installing Homebrew..."
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
         echo "🔄 Configuring Homebrew PATH for Apple Silicon Mac..."
@@ -81,7 +81,7 @@ install_homebrew() {
 }
 
 install_basic_utils() {
-    echo "🛠️  Installing basic utilities..."
+    echo "🛠️ Installing basic utilities..."
     local exit_status=0
 
     if [ "$(uname -s)" = "Darwin" ]; then
@@ -120,7 +120,7 @@ setup_macos_defaults() {
     local exit_status=0
 
     # Setup input source shortcut
-    echo "⌨️  Setting up input source shortcut..."
+    echo "⌨️ Setting up input source shortcut..."
     if ! /usr/libexec/PlistBuddy -c "Print :AppleSymbolicHotKeys:61:value:parameters:2" ~/Library/Preferences/com.apple.symbolichotkeys.plist 2>/dev/null | grep -q "131072"; then
         defaults write com.apple.symbolichotkeys.plist AppleSymbolicHotKeys -dict-add 61 "
         <dict>
@@ -143,7 +143,7 @@ setup_macos_defaults() {
     fi
 
     # Setup Dock
-    echo "🖥️  Configuring Dock..."
+    echo "🖥️ Configuring Dock..."
     current_autohide=$(defaults read com.apple.dock autohide 2>/dev/null || echo "")
     if [ -z "$current_autohide" ] || [ "$current_autohide" = "0" ]; then
         defaults write com.apple.dock autohide -bool true || exit_status=$?
@@ -162,7 +162,7 @@ setup_macos_optional_programs() {
     
     for program in "${MACOS_OPTIONAL_PROGRAMS[@]}"; do
         if ! brew list --cask "$program" >/dev/null 2>&1; then
-            echo "⚙️  Installing $program..."
+            echo "⚙️ Installing $program..."
             if brew install --cask "$program"; then
                 echo "✅ $program installation completed"
             else
@@ -182,7 +182,7 @@ setup_linux_optional_programs() {
     local exit_status=0
 
     for program in "${LINUX_OPTIONAL_PROGRAMS[@]}"; do
-        echo "⚙️  Installing $program..."
+        echo "⚙️ Installing $program..."
         case "$program" in
             nordvpn)
                 if [ -f /etc/debian_version ]; then
