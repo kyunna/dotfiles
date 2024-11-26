@@ -12,24 +12,16 @@ BASIC_UTILS=(
     "chezmoi"
 )
 
-# Optional programs setting for OS
-OPTIONAL_PROGRAMS=()
-
-if [ "$(uname -s)" = "Darwin" ]; then
-    OPTIONAL_PROGRAMS=(
-        "1password"
-        "nordvpn"
-        "raycast"
-        "scroll-reverser"
-        "heynote"
-        "font-jetbrains-mono-nerd-font"
-        "font-pretendard"
-    )
-else
-    OPTIONAL_PROGRAMS=(
-        "nordvpn"
-    )
-fi
+# Optional programs settings
+OPTIONAL_PROGRAMS=(
+    "1password:macos"
+    "nordvpn:macos,linux"
+    "raycast:macos"
+    "scroll-reverser:macos"
+    "heynote:macos"
+    "font-jetbrains-mono-nerd-font:macos"
+    "font-pretendard:macos"
+)
 
 # Check sudo permission
 check_sudo() {
@@ -137,35 +129,48 @@ setup_macos_defaults() {
 setup_optional_programs() {
     echo "📦 Installing optional programs..."
     local exit_status=0
+    local current_os
     
+    # Determine current OS
     if [ "$(uname -s)" = "Darwin" ]; then
-        for program in "${OPTIONAL_PROGRAMS[@]}"; do
-            if ! brew list --cask "$program" >/dev/null 2>&1; then
-                echo "⚙️  Installing $program..."
-                if brew install --cask "$program"; then
-                    echo "✅ $program installation completed"
+        current_os="macos"
+    else
+        current_os="linux"
+    fi
+    
+    # Filter and install programs for current OS
+    for program_info in "${OPTIONAL_PROGRAMS[@]}"; do
+        local program="${program_info%%:*}"          # 프로그램 이름
+        local supported_os="${program_info#*:}"      # 지원하는 OS 목록
+        
+        # Check if current OS is supported
+        if [[ $supported_os == *"$current_os"* ]]; then
+            echo "⚙️  Installing $program..."
+            
+            if [ "$current_os" = "macos" ]; then
+                if ! brew list --cask "$program" >/dev/null 2>&1; then
+                    if brew install --cask "$program"; then
+                        echo "✅ $program installation completed"
+                    else
+                        echo "❌ Failed to install $program"
+                        exit_status=1
+                    fi
                 else
-                    echo "❌ Failed to install $program"
-                    exit_status=1
+                    echo "✅ $program already installed"
                 fi
             else
-                echo "✅ $program already installed"
+                case "$program" in
+                    nordvpn)
+                        if [ -f /etc/debian_version ]; then
+                            curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh | sh || exit_status=$?
+                        elif [ -f /etc/arch-release ]; then
+                            yay -S nordvpn-bin || exit_status=$?
+                        fi
+                        ;;
+                esac
             fi
-        done
-    else
-        for program in "${OPTIONAL_PROGRAMS[@]}"; do
-            echo "⚙️  Installing $program..."
-            case "$program" in
-                nordvpn)
-                    if [ -f /etc/debian_version ]; then
-                        curl -sSf https://downloads.nordcdn.com/apps/linux/install.sh | sh || exit_status=$?
-                    elif [ -f /etc/arch-release ]; then
-                        yay -S nordvpn-bin || exit_status=$?
-                    fi
-                    ;;
-            esac
-        done
-    fi
+        fi
+    done
     
     return $exit_status
 }
