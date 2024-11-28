@@ -128,9 +128,9 @@ setup_optional_programs() {
     
     for program_info in "${OPTIONAL_PROGRAMS[@]}"; do
         local program="${program_info%%:*}"
-        local supported_os="${program_info#*:}"
+        local install_platform="${program_info#*:}"
         
-        if [[ $supported_os == *"$current_os"* ]]; then
+        if [[ $install_platform == *"$current_os"* ]]; then
             if [ "$current_os" = "macos" ]; then
                 if ! brew list --cask "$program" >/dev/null 2>&1; then
                     echo "⚙️  Installing $program..."
