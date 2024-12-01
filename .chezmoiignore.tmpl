@@ -1,40 +1,21 @@
 {{ if stat ".programs_status" }}
 {{ $status := include ".programs_status" | splitList "\n" }}
-
 # Read program status and set ignore patterns
 {{- range $line := $status }}
 {{- if eq $line "1password=not_installed" }}
-.config/1Password/
+dot_config/Private_1Password/
 {{- end }}
 {{- if eq $line "nvim=not_installed" }}
-.config/nvim/
+dot_config/nvim/
 {{- end }}
 {{- if eq $line "fish=not_installed" }}
-.config/fish/
+dot_config/fish/
 {{- end }}
 {{- if eq $line "alacritty=not_installed" }}
-.config/alacritty/
+dot_config/alacritty/
 {{- end }}
 {{- if eq $line "git=not_installed" }}
-.gitconfig
+private_dot_gitconfig
 {{- end }}
-{{- end }}
-
-# OS-specific ignores
-{{- if ne .chezmoi.os "linux" }}
-# Linux-specific files for non-Linux systems
-.local/share/1Password/
-{{- end }}
-
-{{- if ne .chezmoi.os "darwin" }}
-# macOS-specific files for non-macOS systems
-Library/
-{{- end }}
-
-# WSL-specific handling
-{{- if not (and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft")) }}
-# Ignore WSL-specific configurations for non-WSL environments
-AppData/
-{{ else }}
 {{- end }}
 {{ end }}
