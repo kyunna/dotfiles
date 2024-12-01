@@ -2,9 +2,9 @@
     type = "file"
     encrypted = false
 {{- if eq .chezmoi.os "darwin" }}
-    path = "Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.toml"
+    url = "file://{{ .chezmoi.homeDir }}/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.toml"
 {{- else if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
-    path = "/mnt/c/Users/{{ .chezmoi.username }}/AppData/Local/1Password/config/agent.toml"
+    url = "file:///mnt/c/Users/{{ .chezmoi.username }}/AppData/Local/1Password/config/agent.toml"
 {{- else if eq .chezmoi.os "linux" }}
-    path = ".config/1Password/ssh/agent.toml"
+    url = "file://{{ .chezmoi.homeDir }}/.config/1Password/ssh/agent.toml"
 {{- end }}
