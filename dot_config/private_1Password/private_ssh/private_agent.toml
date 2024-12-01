@@ -1,5 +1,2 @@
-{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
-.chezmoiremove
-{{- end }}
 [[ssh-keys]]
 account = "https://my.1password.com/"
