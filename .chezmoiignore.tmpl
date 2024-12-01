@@ -1,21 +1,37 @@
-{{ if stat ".programs_status" }}
-{{ $status := include ".programs_status" | splitList "\n" }}
-# Read program status and set ignore patterns
-{{- range $line := $status }}
-{{- if eq $line "1password=not_installed" }}
+bootstrap.sh
+{{- /* Function to check program installation */ -}}
+{{- $checkProgram := func(program string) bool -}}
+{{-   $installed := false -}}
+{{-   if eq program "1password" -}}
+{{-     if eq .chezmoi.os "darwin" -}}
+{{-       $installed = stat "/Applications/1Password.app" -}}
+{{-     else if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+{{-       $installed = stat (printf "/mnt/c/Users/%s/AppData/Local/1Password" .chezmoi.username) -}}
+{{-     else if eq .chezmoi.os "linux" -}}
+{{-       $installed = stat (printf "%s/.config/1Password" .chezmoi.homeDir) -}}
+{{-     end -}}
+{{-   else -}}
+{{-     $installed = lookPath program -}}
+{{-   end -}}
+{{-   $installed -}}
+{{- end -}}
+
+{{- /* List of programs to check */ -}}
+{{- $programs := list "1password" "git" "fish" "nvim" "alacritty" -}}
+
+{{- /* Check installation status for each program and set ignore patterns */ -}}
+{{- range $program := $programs -}}
+{{-   if not ($checkProgram $program) -}}
+{{-     if eq $program "1password" -}}
 dot_config/Private_1Password/
-{{- end }}
-{{- if eq $line "nvim=not_installed" }}
-dot_config/nvim/
-{{- end }}
-{{- if eq $line "fish=not_installed" }}
-dot_config/fish/
-{{- end }}
-{{- if eq $line "alacritty=not_installed" }}
-dot_config/alacritty/
-{{- end }}
-{{- if eq $line "git=not_installed" }}
+{{-     else if eq $program "git" -}}
 private_dot_gitconfig
-{{- end }}
-{{- end }}
-{{ end }}
+{{-     else if eq $program "fish" -}}
+dot_config/fish/
+{{-     else if eq $program "nvim" -}}
+dot_config/nvim/
+{{-     else if eq $program "alacritty" -}}
+dot_config/alacritty/
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
