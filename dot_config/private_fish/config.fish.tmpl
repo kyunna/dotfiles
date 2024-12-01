@@ -1,0 +1,19 @@
+if status is-interactive
+    # Load core functions
+    setup_editor
+    setup_aliases
+    setup_1password_ssh
+    setup_fzf
+
+    # OS specific configurations
+    switch "{{ .chezmoi.os }}"
+        case "darwin"
+            # Homebrew
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+    end
+
+    # Shell enhancements
+    if type -q starship
+        starship init fish | source
+    end
+end
