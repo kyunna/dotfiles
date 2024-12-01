@@ -1,6 +1,6 @@
 [".config/1Password/ssh/agent.toml"]
     type = "file"
-    encrypted = "none"
+    encrypted = false
 {{- if eq .chezmoi.os "darwin" }}
     path = "Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.toml"
 {{- else if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
