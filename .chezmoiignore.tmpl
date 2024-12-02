@@ -1,37 +1,25 @@
 bootstrap.sh
-{{- /* Function to check program installation */ -}}
-{{- $checkProgram := func(program string) bool -}}
-{{-   $installed := false -}}
-{{-   if eq program "1password" -}}
-{{-     if eq .chezmoi.os "darwin" -}}
-{{-       $installed = stat "/Applications/1Password.app" -}}
-{{-     else if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
-{{-       $installed = stat (printf "/mnt/c/Users/%s/AppData/Local/1Password" .chezmoi.username) -}}
-{{-     else if eq .chezmoi.os "linux" -}}
-{{-       $installed = stat (printf "%s/.config/1Password" .chezmoi.homeDir) -}}
-{{-     end -}}
-{{-   else -}}
-{{-     $installed = lookPath program -}}
-{{-   end -}}
-{{-   $installed -}}
-{{- end -}}
 
-{{- /* List of programs to check */ -}}
-{{- $programs := list "1password" "git" "fish" "nvim" "alacritty" -}}
+/* Programs to check and their config paths */
+{{- $programs := dict 
+    "1password" ".config/1Password/"
+    "nvim" ".config/nvim/"
+    "fish" ".config/fish/"
+    "alacritty" ".config/alacritty/"
+    "git" ".gitconfig"
+-}}
 
-{{- /* Check installation status for each program and set ignore patterns */ -}}
-{{- range $program := $programs -}}
-{{-   if not ($checkProgram $program) -}}
-{{-     if eq $program "1password" -}}
-dot_config/Private_1Password/
-{{-     else if eq $program "git" -}}
-private_dot_gitconfig
-{{-     else if eq $program "fish" -}}
-dot_config/fish/
-{{-     else if eq $program "nvim" -}}
-dot_config/nvim/
-{{-     else if eq $program "alacritty" -}}
-dot_config/alacritty/
-{{-     end -}}
-{{-   end -}}
-{{- end -}}
+/* Check each program and write ignore patterns */
+{{- range $program, $ignore_path := $programs }}
+    {{- if eq $program "1password" }}
+        {{- if not (or 
+            (and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app"))
+            (and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") (stat (print "/mnt/c/Users/" .chezmoi.username "/AppData/Local/1Password")))
+            (and (eq .chezmoi.os "linux") (stat (print .chezmoi.homeDir "/.config/1Password")))
+        ) }}
+{{ $ignore_path }}
+        {{- end }}
+    {{- else if not (lookPath $program) }}
+{{ $ignore_path }}
+    {{- end }}
+{{- end }}
