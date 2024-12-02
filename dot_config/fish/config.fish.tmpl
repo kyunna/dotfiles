@@ -17,7 +17,7 @@ if status is-interactive
     eval "$(/opt/homebrew/bin/brew shellenv)"
     {{- end }}
 
-    ### S1Password SSH agent ###
+    ### 1Password SSH agent ###
     {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
     set -gx SSH_AUTH_SOCK "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
     {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
