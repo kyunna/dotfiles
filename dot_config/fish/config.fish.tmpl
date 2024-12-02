@@ -36,6 +36,23 @@ if status is-interactive
     {{- end }}
     {{- end }}
 
+    ### Node.js Environment ###
+    {{- if lookPath "nvm" }}
+    nvm use node
+    {{- end }}
+    {{- if lookPath "yarn" }}
+    set -U fish_user_paths (yarn global bin) $fish_user_paths
+    {{- end }}
+
+    ### Conda Environment ###
+    {{- if stat "/home/olly/miniconda3/bin/conda" }}
+    eval /home/olly/miniconda3/bin/conda "shell.fish" "hook" $argv | source
+    {{- else if stat "/home/olly/miniconda3/etc/fish/conf.d/conda.fish" }}
+    source "/home/olly/miniconda3/etc/fish/conf.d/conda.fish"
+    {{- else if stat "/home/olly/miniconda3/bin" }}
+    set -x PATH "/home/olly/miniconda3/bin" $PATH
+    {{- end }}
+
     ### Shell Prompt ###
     {{- if lookPath "starship" }}
     starship init fish | source
