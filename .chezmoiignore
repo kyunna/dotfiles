@@ -1,3 +1,5 @@
+bootstrap.sh
+
 {{ $programs := dict 
     "1password" ".config/1Password/"
     "nvim" ".config/nvim/"
