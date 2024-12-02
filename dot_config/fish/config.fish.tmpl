@@ -1,53 +1,52 @@
 if status is-interactive
-    # Editor
+    {{- /* Editor configuration */ -}}
     {{- if lookPath "nvim" }}
     set -gx EDITOR nvim
     alias vim="nvim"
     {{- end }}
 
+    {{- /* File listing enhancement */ -}}
+    {{- if lookPath "lsd" }}
+    alias ls="lsd"
+    {{- end }}
+
+    {{- /* WSL-specific configurations */ -}}
     {{- if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
     # WSL specific aliases
     alias ssh="ssh.exe"
     alias ssh-add="ssh-add.exe"
     {{- end }}
 
-    {{- if lookPath "lsd" }}
-    alias ls="lsd"
+    {{- /* 1Password SSH agent configuration */ -}}
+    {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
+    set -gx SSH_AUTH_SOCK "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+    {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
+    set -gx SSH_AUTH_SOCK "~/.1password/agent.sock"
     {{- end }}
 
-    # 1Password
-    {{- if eq .chezmoi.os "darwin" }}
-        {{- if stat "/Applications/1Password.app" }}
-            set -gx SSH_AUTH_SOCK "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-        {{- end }}
-    {{- else if eq .chezmoi.os "linux" }}
-        {{- if not (lookPath "wslpath") }}
-            {{- if stat "/opt/1Password/1password" }}
-                set -gx SSH_AUTH_SOCK "~/.1password/agent.sock"
-            {{- end }}
-        {{- end }}
-    {{- end }}
-
+    {{- /* FZF configuration */ -}}
     {{- if lookPath "fzf" }}
-    # fzf
+    # FZF initialization and default options
     fzf --fish | source
     set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
+
+    # Set FZF_DEFAULT_COMMAND based on available tools
     {{- if lookPath "fd" }}
-    # fd
     set -gx FZF_DEFAULT_COMMAND "fd --type f --hidden --follow --exclude .git"
-    {{- end }}
-    {{- if lookPath "rg" }}
+    {{- else if lookPath "rg" }}
     set -gx FZF_DEFAULT_COMMAND "rg --files --hidden --follow --glob '!.git'"
     {{- end }}
     {{- end }}
 
+    {{- /* macOS Homebrew configuration */ -}}
     {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
-    # Homebrew
+    # Initialize Homebrew environment
     eval "$(/opt/homebrew/bin/brew shellenv)"
     {{- end }}
 
+    {{- /* Shell prompt enhancement */ -}}
     {{- if lookPath "starship" }}
-    # Shell enhancements
+    # Initialize Starship prompt
     starship init fish | source
     {{- end }}
 end
