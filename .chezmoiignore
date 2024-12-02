@@ -1,3 +1,5 @@
+# default ignore files
+.DS_Store
 bootstrap.sh
 
 {{ $programs := dict 
