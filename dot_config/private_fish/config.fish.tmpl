@@ -1,17 +1,48 @@
 if status is-interactive
-    # Load core functions
-    setup_editor
-    setup_aliases
-    setup_1password_ssh
-    setup_fzf
+    # Editor
+    {{- if lookPath "nvim" }}
+    set -gx EDITOR nvim
+    alias vim="nvim"
+    {{- end }}
 
-    # OS specific configurations
-    {{-if .chezmoi.os "darwin" }}
+    {{- if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
+    # WSL specific aliases
+    alias ssh="ssh.exe"
+    alias ssh-add="ssh-add.exe"
+    {{- end }}
+
+    {{- if lookPath "lsd" }}
+    alias ls="lsd"
+    {{- end }}
+
+    # 1Password
+    {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
+    set -gx SSH_AUTH_SOCK "~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+    {{- end }} 
+    {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) }} # 여기에 1password 설치되었는지 확인해야함(stat 등)
+    set -gx SSH_AUTH_SOCK "~/.1password/agent.sock"
+    {{- end }}
+
+    {{- if lookPath "fzf" }}
+    # fzf
+    fzf --fish | source
+    set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
+    {{- if lookPath "fd" }}
+    # fd
+    set -gx FZF_DEFAULT_COMMAND "fd --type f --hidden --follow --exclude .git"
+    {{- end }}
+    {{- if lookPath "rg" }}
+    set -gx FZF_DEFAULT_COMMAND "rg --files --hidden --follow --glob '!.git'"
+    {{- end }}
+    {{- end }}
+
+    {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
+    # Homebrew
     eval "$(/opt/homebrew/bin/brew shellenv)"
     {{- end }}
 
-    # Shell enhancements
     {{- if lookPath "starship" }}
+    # Shell enhancements
     starship init fish | source
     {{- end }}
 end
