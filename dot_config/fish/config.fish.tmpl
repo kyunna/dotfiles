@@ -16,11 +16,16 @@ if status is-interactive
     {{- end }}
 
     # 1Password
-    {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
-    set -gx SSH_AUTH_SOCK "~/Library/Group\ Containers/2BUA8C4S2C.com.1password/t/agent.sock"
-    {{- end }} 
-    {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) }} # 여기에 1password 설치되었는지 확인해야함(stat 등)
-    set -gx SSH_AUTH_SOCK "~/.1password/agent.sock"
+    {{- if eq .chezmoi.os "darwin" }}
+        {{- if stat "/Applications/1Password.app" }}
+            set -gx SSH_AUTH_SOCK "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+        {{- end }}
+    {{- else if eq .chezmoi.os "linux" }}
+        {{- if not (lookPath "wslpath") }}
+            {{- if stat "/opt/1Password/1password" }}
+                set -gx SSH_AUTH_SOCK "~/.1password/agent.sock"
+            {{- end }}
+        {{- end }}
     {{- end }}
 
     {{- if lookPath "fzf" }}
