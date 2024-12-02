@@ -9,12 +9,12 @@ if status is-interactive
     {{- end }}
 
     ### Platform Specific Settings ###
+    {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    {{- end }}
     {{- if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
     alias ssh="ssh.exe"
     alias ssh-add="ssh-add.exe"
-    {{- end }}
-    {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
-    eval "$(/opt/homebrew/bin/brew shellenv)"
     {{- end }}
 
     ### 1Password SSH agent ###
