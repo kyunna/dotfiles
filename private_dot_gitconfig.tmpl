@@ -5,7 +5,7 @@
     signingkey = {{ .signingkey }}
 {{- end }}
 
-{{ if or (stat "/Applications/1Password.app") (stat "/opt/1Password/1password") (stat (joinPath "/mnt/c/Users/" (output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" | trim) "/Appdata/Local/1Password")) -}}
+{{ if or (stat "/Applications/1Password.app") (stat "/opt/1Password/1password") (stat (joinPath "/mnt/c/Users/" (output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" | trim) "/AppData/Local/1Password")) -}}
 [gpg]
     format = ssh
 
