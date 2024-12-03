@@ -42,16 +42,11 @@ if status is-interactive
     function nvm
         bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
     end
-    set --universal nvm_default_version latest
     {{- else if stat (joinPath .chezmoi.homeDir ".nvm/nvm.sh") }}
     set -gx NVM_DIR "$HOME/.nvm"
     function nvm
         bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
     end
-    set --universal nvm_default_version latest
-    {{- end }}
-    {{- if lookPath "yarn" }}
-    set -gx fish_user_paths (yarn global bin) $fish_user_paths
     {{- end }}
 
     ### Conda Environment ###
