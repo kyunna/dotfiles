@@ -165,6 +165,7 @@ setup_dotfiles() {
             echo "🔄 Initializing dotfiles..."
             chezmoi init https://github.com/kyunna/dotfiles.git
             chezmoi apply
+            chezmoi git -- remote set-url origin git@github.com:kyunna/dotfiles.git
         else
             echo "✅ Dotfiles already initialized"
         fi
