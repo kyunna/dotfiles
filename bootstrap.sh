@@ -165,14 +165,16 @@ setup_dotfiles() {
             echo "🔄 Initializing dotfiles..."
             chezmoi init https://github.com/kyunna/dotfiles.git
             chezmoi apply
-            if timeout 10 ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+        else
+            echo "✅ Dotfiles already initialized"
+        fi
+        if chezmoi git -- remote get-url origin | grep -q "https://"; then
+            if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
                 chezmoi git -- remote set-url origin git@github.com:kyunna/dotfiles.git
                 echo "✅ Repository URL changed to SSH"
             else
-                echo "⚠️ SSH authentication not configured or timed out, keeping HTTPS URL"
+                echo "⚠️ Using HTTPS URL (SSH authentication failed)"
             fi
-        else
-            echo "✅ Dotfiles already initialized"
         fi
     else
         echo "❌ chezmoi is not installed properly"
