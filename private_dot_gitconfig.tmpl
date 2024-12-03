@@ -1,23 +1,23 @@
+{{- if true }}
 [user]
     name = {{ .name }}
     email = {{ .email }}
     signingkey = {{ .signingkey }}
+{{ end }}
 
+{{- if or ((stat "/Applications/1Password.app") (stat "/opt/1Password/1password")) (stat (joinPath "/mnt/c/Users/" (output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME") "/Appdata/Local/1Password/") )) }}
 [gpg]
     format = ssh
 
-{{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
 [gpg "ssh"]
+    {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
     program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-{{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
-[gpg "ssh"]    
+    {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
     program = "/opt/1Password/op-ssh-sign"
-{{- else if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
-[gpg "ssh"]
-    program = {{ output "wslpath" "-a" (printf "C:/Users/%s/AppData/Local/1Password/app/8/op-ssh-sign-wsl" (output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" | trim)) | quote }}
-{{ end }}
+    {{- else if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
+    program = {{ output "wslpath" "-a" (printf "/mnt/c/Users/%s/AppData/Local/1Password/app/8/op-ssh-sign-wsl" (output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" | trim)) | trim | quote }}
+    {{- end }}
 
-{{- if or (and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app")) (and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password")) (and (eq .chezmoi.os "linux") (lookPath "wslpath")) }}
 [commit]    
     gpgSign = true
 {{- end }}
