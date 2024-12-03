@@ -13,7 +13,7 @@ README.md
 {{ $current_os := .chezmoi.os }}
 {{ $current_username := .chezmoi.username }}
 {{ if and (eq $current_os "linux") (lookPath "wslpath") }}
-    {{ $current_username := output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" }}
+    {{ $current_username := output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" | trim }}
 {{ end }}
 {{- range $program, $ignore_path := $programs }}
     {{- if eq $program "1password" }}
