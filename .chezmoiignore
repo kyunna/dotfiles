@@ -13,7 +13,7 @@
 {{- range $program, $ignore_path := $programs }}
     {{- if eq $program "1password" }}
         {{- if not (or 
-            (and (eq $current_os "darwin") (stat "~/.config/1Password"))
+            (and (eq $current_os "darwin") (stat "/Applications/1Password.app"))
             (and (eq $current_os "linux") (lookPath "wslpath") (stat (joinPath "/mnt/c/Users/" $current_username "/AppData/Local/1Password")))
             (and (eq $current_os "linux") (not (lookPath "wslpath")) (stat "~/.config/1Password"))
         ) }}
