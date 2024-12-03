@@ -19,9 +19,9 @@ if status is-interactive
 
     ### 1Password SSH Agent ###
     {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
-    set -gx SSH_AUTH_SOCK "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+    set -gx SSH_AUTH_SOCK "$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
     {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
-    set -gx SSH_AUTH_SOCK "~/.1password/agent.sock"
+    set -gx SSH_AUTH_SOCK "$HOME/.1password/agent.sock"
     {{- end }}
 
     ### Search & Navigation ###
