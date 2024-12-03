@@ -1,6 +1,6 @@
 if status is-interactive
 
-    {{ if or (lookPath "nvim") (lookPath "lsd") }}
+    {{- if or (lookPath "nvim") (lookPath "lsd") }}
     ### Editor & Basic Aliases ###
     {{- if lookPath "nvim" }}
     set -gx EDITOR nvim
