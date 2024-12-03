@@ -1,4 +1,5 @@
 if status is-interactive
+    {{- if or (lookPath "nvim") (lookPath "lsd") }}
     ### Editor & Basic Aliases ###
     {{- if lookPath "nvim" }}
     set -gx EDITOR nvim
@@ -7,7 +8,9 @@ if status is-interactive
     {{- if lookPath "lsd" }}
     alias ls="lsd"
     {{- end }}
+    {{- end }}
 
+    {{- if or (and (eq .chezmoi.os "darwin") (lookPath "brew")) (and (eq .chezmoi.os "linux") (lookPath "wslpath")) }}
     ### Platform Specific Settings ###
     {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
     eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -16,14 +19,18 @@ if status is-interactive
     alias ssh="ssh.exe"
     alias ssh-add="ssh-add.exe"
     {{- end }}
+    {{- end }}
 
-    ### 1Password SSH agent ###
+    {{- if or (and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app")) (and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password")) }}
+    ### 1Password SSH Agent ###
     {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
     set -gx SSH_AUTH_SOCK "~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
     {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
     set -gx SSH_AUTH_SOCK "~/.1password/agent.sock"
     {{- end }}
+    {{- end }}
 
+    {{- if or (lookPath "fzf") (lookPath "fd") (lookPath "rg") }}
     ### Search & Navigation ###
     {{- if lookPath "fzf" }}
     fzf --fish | source
@@ -35,26 +42,41 @@ if status is-interactive
     set -gx FZF_DEFAULT_COMMAND "rg --files --hidden --follow --glob '!.git'"
     {{- end }}
     {{- end }}
+    {{- end }}
 
+    {{- if or (and (eq .chezmoi.os "darwin") (lookPath "brew")) (stat (joinPath .chezmoi.homeDir ".nvm/nvm.sh")) (lookPath "yarn") }}
     ### Node.js Environment ###
-    {{- if lookPath "nvm" }}
+    {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
+    set -gx NVM_DIR (brew --prefix nvm)
+    function nvm
+        bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
+    end
+    set --universal nvm_default_version latest
+    {{- else if stat (joinPath .chezmoi.homeDir ".nvm/nvm.sh") }}
+    set -gx NVM_DIR "$HOME/.nvm"
+    function nvm
+        bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
+    end
     set --universal nvm_default_version latest
     {{- end }}
     {{- if lookPath "yarn" }}
     set -gx fish_user_paths (yarn global bin) $fish_user_paths
     {{- end }}
-
-    ### Conda Environment ###
-    {{- if stat "/home/olly/miniconda3/bin/conda" }}
-    eval /home/olly/miniconda3/bin/conda "shell.fish" "hook" $argv | source
-    {{- else if stat "/home/olly/miniconda3/etc/fish/conf.d/conda.fish" }}
-    source "/home/olly/miniconda3/etc/fish/conf.d/conda.fish"
-    {{- else if stat "/home/olly/miniconda3/bin" }}
-    set -x PATH "/home/olly/miniconda3/bin" $PATH
     {{- end }}
 
-    ### Shell Prompt ###
+    {{- if or (stat (joinPath .chezmoi.homeDir "miniconda3/bin/conda")) (stat (joinPath .chezmoi.homeDir "miniconda3/etc/fish/conf.d/conda.fish")) (stat (joinPath .chezmoi.homeDir "miniconda3/bin")) }}
+    ### Conda Environment ###
+    {{- if stat (joinPath .chezmoi.homeDir "miniconda3/bin/conda") }}
+    eval "{{ .chezmoi.homeDir }}/miniconda3/bin/conda" "shell.fish" "hook" $argv | source
+    {{- else if stat (joinPath .chezmoi.homeDir "miniconda3/etc/fish/conf.d/conda.fish") }}
+    source "{{ .chezmoi.homeDir }}/miniconda3/etc/fish/conf.d/conda.fish"
+    {{- else if stat (joinPath .chezmoi.homeDir "miniconda3/bin") }}
+    set -x PATH "{{ .chezmoi.homeDir }}/miniconda3/bin" $PATH
+    {{- end }}
+    {{- end }}
+
     {{- if lookPath "starship" }}
+    ### Shell Prompt ###
     starship init fish | source
     {{- end }}
 end
