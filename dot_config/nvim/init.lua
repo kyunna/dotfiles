@@ -143,13 +143,17 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-    -- Night Owl(color scheme)
+    -- Nightowl (color scheme)
     {
-        "oxfist/night-owl.nvim", lazy = false, priority = 1000,
+        "oxfist/night-owl.nvim",
+        lazy = false,
+        priority = 1000,
         config = function()
-            require("night-owl").setup()
+            require("night-owl").setup {
+                transparent_background = true,
+            }
             vim.cmd.colorscheme("night-owl")
-        end
+        end,
     },
     -- LSP & plugins
     {
@@ -159,7 +163,6 @@ require("lazy").setup({
             { "williamboman/mason.nvim", config = true, opts = { } },
             "williamboman/mason-lspconfig.nvim"
         },
-
 
         config = function()
             local signs = { Error = "", Warn = "", Hint = "󰌶", Info = "" }
@@ -459,11 +462,11 @@ require("lazy").setup({
                         {
                             function()
                                 return "󰌒 " .. vim.api.nvim_buf_get_option(0, "tabstop")
-                            end,
+                            end
                         }
                     },
                     lualine_y = {
-                        { "filetype", separator = "", padding = { left = 1, right = 0 } },
+                        { "filetype", separator = "", padding = { left = 1, right = 0 }, color = { bg = "none" } },
                         {
                             icon = " ",
                             function()
@@ -474,7 +477,8 @@ require("lazy").setup({
                                     table.insert(client_names, client.name)
                                 end
                                 return table.concat(client_names, ", ")
-                            end
+                            end,
+                            color = { bg = "none" }
                         }
                     },
                     lualine_z = {
@@ -559,6 +563,8 @@ require("lazy").setup({
     {
         "SmiteshP/nvim-navic",
         config = function()
+            vim.api.nvim_set_hl(0, "NavicText", { bg = "none" })
+            vim.api.nvim_set_hl(0, "NavicSeparator", { bg = "none" })
             vim.api.nvim_set_hl(0, "NavicIconsFile",          { fg = "#7aa2f7" }) -- Soft Blue
             vim.api.nvim_set_hl(0, "NavicIconsModule",        { fg = "#5eacd3" }) -- Sky Blue
             vim.api.nvim_set_hl(0, "NavicIconsNamespace",     { fg = "#9d7cd8" }) -- Lavender
