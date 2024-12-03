@@ -38,10 +38,10 @@ if status is-interactive
 
     ### Node.js Environment ###
     {{- if lookPath "nvm" }}
-    nvm use node
+    set --universal nvm_default_version latest
     {{- end }}
     {{- if lookPath "yarn" }}
-    set -U fish_user_paths (yarn global bin) $fish_user_paths
+    set -gx fish_user_paths (yarn global bin) $fish_user_paths
     {{- end }}
 
     ### Conda Environment ###
