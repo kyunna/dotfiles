@@ -6,18 +6,18 @@
 [gpg]
     format = ssh
 
-    {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
+{{ if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
 [gpg "ssh"]
     program = "/Applications/1Password.app/Contents/MacOS/op-ssh-sign"
-    {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
+{{ else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
 [gpg "ssh"]    
     program = "/opt/1Password/op-ssh-sign"
-    {{- else if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
+{{ else if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
 [gpg "ssh"]    
     program = {{ output "wslpath" "-a" (printf "C:/Users/%s/AppData/Local/1Password/app/8/op-ssh-sign-wsl" (output "cmd.exe" "/c" "echo %USERNAME%" | trim)) | trim | quote }}
-    {{- end }}
+{{- end }}
 
-    {{- if or (and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app")) (and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password")) (and (eq .chezmoi.os "linux") (lookPath "wslpath")) }}
+{{- if or (and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app")) (and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password")) (and (eq .chezmoi.os "linux") (lookPath "wslpath")) }}
 [commit]    
     gpgSign = true
-    {{- end }}
+{{- end }}
