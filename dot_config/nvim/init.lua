@@ -143,12 +143,12 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 require("lazy").setup({
-    -- Tokyonight(color scheme)
+    -- Night Owl(color scheme)
     {
-        "folke/tokyonight.nvim", lazy = false, priority = 1000, opts = { },
-
-        init = function()
-            vim.cmd.colorscheme("tokyonight-moon")
+        "oxfist/night-owl.nvim", lazy = false, priority = 1000,
+        config = function()
+            require("night-owl").setup()
+            vim.cmd.colorscheme("night-owl")
         end
     },
     -- LSP & plugins
