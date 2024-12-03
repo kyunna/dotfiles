@@ -165,7 +165,12 @@ setup_dotfiles() {
             echo "🔄 Initializing dotfiles..."
             chezmoi init https://github.com/kyunna/dotfiles.git
             chezmoi apply
-            chezmoi git -- remote set-url origin git@github.com:kyunna/dotfiles.git
+            if ssh -T git@github.com 2>&1 | grep -q "successfully authenticated"; then
+                chezmoi git -- remote set-url origin git@github.com:kyunna/dotfiles.git
+                echo "✅ Repository URL changed to SSH"
+            else
+                echo "⚠️ SSH authentication not configured, keeping HTTPS URL"
+            fi
         else
             echo "✅ Dotfiles already initialized"
         fi
