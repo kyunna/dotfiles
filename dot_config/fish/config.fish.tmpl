@@ -1,0 +1,65 @@
+if status is-interactive
+    ### Editor & Basic Aliases ###
+    {{- if lookPath "nvim" }}
+    set -gx EDITOR nvim
+    alias vim="nvim"
+    {{- end }}
+    {{- if lookPath "lsd" }}
+    alias ls="lsd"
+    {{- end }}
+
+    ### Platform Specific Settings ###
+    {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    {{- end }}
+    {{- if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
+    alias ssh="ssh.exe"
+    alias ssh-add="ssh-add.exe"
+    {{- end }}
+
+    ### 1Password SSH Agent ###
+    {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
+    set -gx SSH_AUTH_SOCK ~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock
+    {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
+    set -gx SSH_AUTH_SOCK ~/.1password/agent.sock
+    {{- end }}
+
+    ### Search & Navigation ###
+    {{- if lookPath "fzf" }}
+    fzf --fish | source
+    set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
+    {{- if lookPath "fd" }}
+    set -gx FZF_DEFAULT_COMMAND "fd --type f --hidden --follow --exclude .git"
+    {{- end }}
+    {{- if lookPath "rg" }}
+    set -gx FZF_DEFAULT_COMMAND "rg --files --hidden --follow --glob '!.git'"
+    {{- end }}
+    {{- end }}
+
+    ### Node.js Environment ###
+    {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
+    set -gx NVM_DIR (brew --prefix nvm)
+    function nvm
+        bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
+    end
+    {{- else if stat (joinPath .chezmoi.homeDir ".nvm/nvm.sh") }}
+    set -gx NVM_DIR "$HOME/.nvm"
+    function nvm
+        bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
+    end
+    {{- end }}
+
+    ### Conda Environment ###
+    {{- if stat (joinPath .chezmoi.homeDir "miniconda3/bin/conda") }}
+    eval "{{ .chezmoi.homeDir }}/miniconda3/bin/conda" "shell.fish" "hook" $argv | source
+    {{- else if stat (joinPath .chezmoi.homeDir "miniconda3/etc/fish/conf.d/conda.fish") }}
+    source "{{ .chezmoi.homeDir }}/miniconda3/etc/fish/conf.d/conda.fish"
+    {{- else if stat (joinPath .chezmoi.homeDir "miniconda3/bin") }}
+    set -x PATH "{{ .chezmoi.homeDir }}/miniconda3/bin" $PATH
+    {{- end }}
+
+    ### Shell Prompt ###
+    {{- if lookPath "starship" }}
+    starship init fish | source
+    {{- end }}
+end

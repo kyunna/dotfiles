@@ -1,0 +1,28 @@
+README.md
+bootstrap.sh
+
+{{ $programs := dict 
+    "1password" ".config/1Password/"
+    "nvim" ".config/nvim/"
+    "fish" ".config/fish/"
+    "alacritty" ".config/alacritty/"
+    "git" ".gitconfig"
+}}
+{{ $current_os := .chezmoi.os }}
+{{ $current_username := .chezmoi.username }}
+{{ if and (eq $current_os "linux") (lookPath "wslpath") }}
+    {{ $current_username := output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" | trim }}
+{{ end }}
+{{- range $program, $ignore_path := $programs }}
+    {{- if eq $program "1password" }}
+        {{- if not (or 
+            (and (eq $current_os "darwin") (stat "/Applications/1Password.app"))
+            (and (eq $current_os "linux") (lookPath "wslpath") (stat (joinPath "/mnt/c/Users/" $current_username "/AppData/Local/1Password")))
+            (and (eq $current_os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password"))
+        ) }}
+{{ $ignore_path }}
+        {{- end }}
+    {{- else if not (lookPath $program) }}
+{{ $ignore_path }}
+    {{- end }}
+{{- end }}
