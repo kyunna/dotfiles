@@ -536,11 +536,11 @@ require("lazy").setup({
                     },
                     lualine_z = {
                         {
-                            "progress",
+                            "location",
                             color = get_mode_color
                         },
                         {
-                            "location",
+                            "progress",
                             padding = { left = 0, right = 1 },
                             color = get_mode_color
                         }
@@ -555,10 +555,11 @@ require("lazy").setup({
                                 alternate_file = "# ",
                                 directory = " "
                             },
+                            max_length = vim.o.columns,
                             buffers_color = {
                                 active = { fg = "#030d17", bg = "#c792ea" },
                                 inactive = { fg = "#555e8f", bg = "#01111d" }
-                            },
+                            }
                         }
                     }
                 },
