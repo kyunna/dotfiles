@@ -9,6 +9,9 @@ BASIC_UTILS=(
     "wget"
     "tmux"
     "fzf"
+    "lsd"
+    "bat"
+    "zoxide"
     "chezmoi"
 )
 
