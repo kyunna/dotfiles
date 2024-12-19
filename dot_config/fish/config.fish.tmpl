@@ -8,6 +8,11 @@ if status is-interactive
     alias ls="lsd"
     {{- end }}
 
+    ### User Binary Path ###
+    {{- if stat (joinPath .chezmoi.homeDir ".local/bin") }}
+    set -gx PATH "$HOME/.local/bin" $PATH
+    {{- end }}
+
     ### Platform Specific Settings ###
     {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
     eval "$(/opt/homebrew/bin/brew shellenv)"
@@ -15,7 +20,7 @@ if status is-interactive
     {{- if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
     alias ssh="ssh.exe"
     alias ssh-add="ssh-add.exe"
-    {{- end }}
+    {{- end }}    
 
     ### 1Password SSH Agent ###
     {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
@@ -56,6 +61,11 @@ if status is-interactive
     source "{{ .chezmoi.homeDir }}/miniconda3/etc/fish/conf.d/conda.fish"
     {{- else if stat (joinPath .chezmoi.homeDir "miniconda3/bin") }}
     set -x PATH "{{ .chezmoi.homeDir }}/miniconda3/bin" $PATH
+    {{- end }}
+
+    ### Navigation Tools ###
+    {{- if lookPath "zoxide" }}
+       zoxide init fish | source
     {{- end }}
 
     ### Shell Prompt ###
