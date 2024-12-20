@@ -1,11 +1,18 @@
 if status is-interactive
-    ### Editor & Basic Aliases ###
+    ### Basic Tool Aliases ###
+    # Common command aliases and editor preferences
+    # Simple replacements and environment variables for everyday tools
     {{- if lookPath "nvim" }}
     set -gx EDITOR nvim
     alias vim="nvim"
     {{- end }}
     {{- if lookPath "lsd" }}
     alias ls="lsd"
+    {{- end }}
+
+    ### User Binary Path ###
+    {{- if stat (joinPath .chezmoi.homeDir ".local/bin") }}
+    fish_add_path ~/.local/bin
     {{- end }}
 
     ### Platform Specific Settings ###
@@ -24,24 +31,16 @@ if status is-interactive
     set -gx SSH_AUTH_SOCK ~/.1password/agent.sock
     {{- end }}
 
-    ### Search & Navigation ###
-    {{- if lookPath "fzf" }}
-    fzf --fish | source
-    set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
-    {{- if lookPath "fd" }}
-    set -gx FZF_DEFAULT_COMMAND "fd --type f --hidden --follow --exclude .git"
-    {{- end }}
-    {{- if lookPath "rg" }}
-    set -gx FZF_DEFAULT_COMMAND "rg --files --hidden --follow --glob '!.git'"
-    {{- end }}
-    {{- end }}
-
     ### Node.js Environment ###
+    # Initialize nvm function for Node.js version management
     {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
+    {{- $brewPrefix := output "brew" "--prefix" | trim }}
+    {{- if stat (joinPath $brewPrefix "opt/nvm/nvm.sh") }}
     set -gx NVM_DIR (brew --prefix nvm)
     function nvm
         bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
     end
+    {{- end }}
     {{- else if stat (joinPath .chezmoi.homeDir ".nvm/nvm.sh") }}
     set -gx NVM_DIR "$HOME/.nvm"
     function nvm
@@ -58,7 +57,23 @@ if status is-interactive
     set -x PATH "{{ .chezmoi.homeDir }}/miniconda3/bin" $PATH
     {{- end }}
 
-    ### Shell Prompt ###
+    ### Shell Integrations ###
+    # Tools that hook into shell features are initialized last
+    # This ensures they have access to all environment variables and settings
+    {{- if lookPath "fzf" }}
+    fzf --fish | source
+    set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
+    {{- if lookPath "fd" }}
+    set -gx FZF_DEFAULT_COMMAND "fd --type f --hidden --follow --exclude .git"
+    {{- end }}
+    {{- if lookPath "rg" }}
+    set -gx FZF_DEFAULT_COMMAND "rg --files --hidden --follow --glob '!.git'"
+    {{- end }}
+    {{- end }}
+
+    {{- if lookPath "zoxide" }}
+    zoxide init fish | source
+    {{- end }}
     {{- if lookPath "starship" }}
     starship init fish | source
     {{- end }}

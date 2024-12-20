@@ -122,17 +122,17 @@ vim.api.nvim_create_autocmd("BufReadPost", {
     end
 })
 -- ColorSchme for transparent background
--- vim.api.nvim_create_autocmd("ColorScheme", {
---   pattern = "*",
---   callback = function()
---     vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
---   end
--- })
--- vim.api.nvim_create_autocmd({"InsertEnter", "InsertLeave"}, {
---   callback = function()
---     vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
---   end
--- })
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "*",
+  callback = function()
+    vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
+  end
+})
+vim.api.nvim_create_autocmd({"InsertEnter", "InsertLeave"}, {
+  callback = function()
+    vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
+  end
+})
 
 ------------------------------
 -- Plugins
@@ -432,7 +432,7 @@ require("lazy").setup({
             end
             for _, mode in pairs({"normal", "insert", "visual", "replace", "command", "inactive"}) do
                 if auto_theme_custom[mode] then
-                    for _, section in pairs({"a", "b", "c"}) do
+                    for _, section in pairs({ "a", "b", "c", "x", "y", "z" }) do
                         if auto_theme_custom[mode][section] then
                             auto_theme_custom[mode][section].bg = "none"
                         end
@@ -458,17 +458,12 @@ require("lazy").setup({
                     lualine_b = {
                         {
                             "branch",
-                            color = { fg = "#d6deeb", bg = "#0b253a" }
+                            color = { bg = "#0b253a" },
                         },
                         {
                             "diff",
-                            color = { fg = "#d6deeb", bg = "#0b253a" }
+                            color = { bg = "#0b253a" }
                         },
-                        {
-                            "diagnostics",
-                            sources = { "nvim_diagnostic" },
-                            color = { fg = "#d6deeb", bg = "#0b253a" }
-                        }
                     },
                     lualine_c = {
                         {
@@ -504,27 +499,26 @@ require("lazy").setup({
                         {
                             require("noice").api.status.command.get,
                             cond = require("noice").api.status.command.has,
-                            color = { fg = "#bb9af7" }
+                            color = { fg = "#bb9af7", bg = "#0b253a" }
                         },
                         {
                             require("noice").api.status.mode.get,
                             cond = require("noice").api.status.mode.has,
-                            color = { fg = "#ff9e64" }
+                            color = { fg = "#ff9e64", bg = "#0b253a" }
                         },
-                        { "fileformat" },
-                        { "encoding" },
                         {
-                            function()
-                                return "󰌒 " .. vim.api.nvim_buf_get_option(0, "tabstop")
-                            end
-                        }
+                            "diagnostics",
+                            sources = { "nvim_diagnostic" },
+                            sections ={ "error", "warn" },
+                            always_visible = true,
+                            color = { bg = "#0b253a" }
+                        },
                     },
                     lualine_y = {
                         {
                             "filetype",
-                            separator = "",
                             padding = { left = 1, right = 0 },
-                            color = { fg = "#d6deeb", bg = "#0b253a" }
+                            color = { bg = "#0b253a" }
                         },
                         {
                             icon = " ",
@@ -537,16 +531,16 @@ require("lazy").setup({
                                 end
                                 return table.concat(client_names, ", ")
                             end,
-                            color = { fg = "#d6deeb", bg = "#0b253a" }
+                            color = { bg = "#0b253a" }
                         }
                     },
                     lualine_z = {
                         {
-                            "progress",
+                            "location",
                             color = get_mode_color
                         },
                         {
-                            "location",
+                            "progress",
                             padding = { left = 0, right = 1 },
                             color = get_mode_color
                         }
@@ -561,6 +555,7 @@ require("lazy").setup({
                                 alternate_file = "# ",
                                 directory = " "
                             },
+                            max_length = vim.o.columns,
                             buffers_color = {
                                 active = { fg = "#030d17", bg = "#c792ea" },
                                 inactive = { fg = "#555e8f", bg = "#01111d" }
@@ -574,7 +569,7 @@ require("lazy").setup({
                             "filetype",
                             icon_only = true,
                             separator = { right = "" },
-                            padding = { left = 1, right = 0 }
+                            padding = { left = 1, right = 0 },
                         },
                         {
                             "filename",
@@ -587,12 +582,14 @@ require("lazy").setup({
                     lualine_c = {
                         {
                             "navic",
-                            padding = { left = 1, right = 0 }
+                            padding = { left = 1, right = 0 },
                         }
                     },
                     lualine_z = {
                         {
-                            function () return " " end,
+                            function ()
+                                return " "
+                            end,
                         }
                     }
                 }
