@@ -1,80 +1,85 @@
 if status is-interactive
-    ### Basic Tool Aliases ###
-    # Common command aliases and editor preferences
-    # Simple replacements and environment variables for everyday tools
-    {{- if lookPath "nvim" }}
-    set -gx EDITOR nvim
-    alias vim="nvim"
-    {{- end }}
-    {{- if lookPath "lsd" }}
-    alias ls="lsd"
-    {{- end }}
+    ### Path Configuration ###
+    # Add user binary path first to ensure local commands are available
+    if test -d ~/.local/bin
+        fish_add_path ~/.local/bin
+    end
 
-    ### User Binary Path ###
-    {{- if stat (joinPath .chezmoi.homeDir ".local/bin") }}
-    fish_add_path ~/.local/bin
-    {{- end }}
-
-    ### Platform Specific Settings ###
     {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
+    ### Platform Initialization ###
+    # OS-specific environment setup
     eval "$(/opt/homebrew/bin/brew shellenv)"
     {{- end }}
-    {{- if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
+
+    ### Basic Tools Configuration ###
+    # Editor and common command aliases
+    if type -q nvim
+        set -gx EDITOR nvim
+        alias vim="nvim"
+    end
+    if type -q lsd
+        alias ls="lsd"
+    end
+
+    ### SSH Agent Configuration ###
+    # 1Password SSH agent setup
+    {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
+    # macOS: Use 1Password SSH agent
+    set -gx SSH_AUTH_SOCK ~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock
+    {{- else if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
+    # WSL: Redirect SSH commands to Windows
     alias ssh="ssh.exe"
     alias ssh-add="ssh-add.exe"
-    {{- end }}
-
-    ### 1Password SSH Agent ###
-    {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
-    set -gx SSH_AUTH_SOCK ~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock
     {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
+    # Linux: Use 1Password SSH agent
     set -gx SSH_AUTH_SOCK ~/.1password/agent.sock
     {{- end }}
 
-    ### Node.js Environment ###
-    # Initialize nvm function for Node.js version management
+    ### Development Environment Setup ###
     {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
     {{- $brewPrefix := output "brew" "--prefix" | trim }}
     {{- if stat (joinPath $brewPrefix "opt/nvm/nvm.sh") }}
+    # Setup Homebrew NVM environment
     set -gx NVM_DIR (brew --prefix nvm)
     function nvm
         bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
     end
     {{- end }}
     {{- else if stat (joinPath .chezmoi.homeDir ".nvm/nvm.sh") }}
+    # Setup standard NVM environment
     set -gx NVM_DIR "$HOME/.nvm"
     function nvm
         bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
     end
     {{- end }}
 
-    ### Conda Environment ###
-    {{- if stat (joinPath .chezmoi.homeDir "miniconda3/bin/conda") }}
-    eval "{{ .chezmoi.homeDir }}/miniconda3/bin/conda" "shell.fish" "hook" $argv | source
-    {{- else if stat (joinPath .chezmoi.homeDir "miniconda3/etc/fish/conf.d/conda.fish") }}
-    source "{{ .chezmoi.homeDir }}/miniconda3/etc/fish/conf.d/conda.fish"
-    {{- else if stat (joinPath .chezmoi.homeDir "miniconda3/bin") }}
-    set -x PATH "{{ .chezmoi.homeDir }}/miniconda3/bin" $PATH
-    {{- end }}
+    # Conda environment setup
+    if test -f ~/miniconda3/bin/conda
+        eval "~/miniconda3/bin/conda" "shell.fish" "hook" $argv | source
+    else if test -f ~/miniconda3/etc/fish/conf.d/conda.fish
+        source ~/miniconda3/etc/fish/conf.d/conda.fish
+    else if test -d ~/miniconda3/bin
+        set -x PATH ~/miniconda3/bin $PATH
+    end
 
     ### Shell Integrations ###
-    # Tools that hook into shell features are initialized last
-    # This ensures they have access to all environment variables and settings
-    {{- if lookPath "fzf" }}
-    fzf --fish | source
-    set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
-    {{- if lookPath "fd" }}
-    set -gx FZF_DEFAULT_COMMAND "fd --type f --hidden --follow --exclude .git"
-    {{- end }}
-    {{- if lookPath "rg" }}
-    set -gx FZF_DEFAULT_COMMAND "rg --files --hidden --follow --glob '!.git'"
-    {{- end }}
-    {{- end }}
+    # Initialize shell enhancements and tools
+    if type -q fzf
+        fzf --fish | source
+        set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
+        if type -q fd
+            set -gx FZF_DEFAULT_COMMAND "fd --type f --hidden --follow --exclude .git"
+        end
+        if type -q rg
+            set -gx FZF_DEFAULT_COMMAND "rg --files --hidden --follow --glob '!.git'"
+        end
+    end
 
-    {{- if lookPath "zoxide" }}
-    zoxide init fish | source
-    {{- end }}
-    {{- if lookPath "starship" }}
-    starship init fish | source
-    {{- end }}
+    if type -q zoxide
+        zoxide init fish | source
+    end
+
+    if type -q starship
+        starship init fish | source
+    end
 end
