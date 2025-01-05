@@ -58,8 +58,8 @@ vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Prev diagnostic" }
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
 vim.keymap.set("n", "[e", function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR }) end, { desc = "Prev error" })
 vim.keymap.set("n", "]e", function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR }) end, { desc = "Next error" })
-vim.keymap.set("n", "[w", function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.ERROR }) end, { desc = "Prev warning" })
-vim.keymap.set("n", "]w", function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.ERROR }) end, { desc = "Next warning" })
+vim.keymap.set("n", "[w", function() vim.diagnostic.goto_prev({ severity = vim.diagnostic.severity.WARN }) end, { desc = "Prev warning" })
+vim.keymap.set("n", "]w", function() vim.diagnostic.goto_next({ severity = vim.diagnostic.severity.WARN }) end, { desc = "Next warning" })
 
 -- Buffers
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
@@ -128,10 +128,14 @@ vim.api.nvim_create_autocmd("ColorScheme", {
     vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
   end
 })
-vim.api.nvim_create_autocmd({"InsertEnter", "InsertLeave"}, {
-  callback = function()
-    vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
-  end
+-- JavaScript/TypeScript file settings
+vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "javascript", "typescript", "javascriptreact", "typescriptreact", "css", "scss", "html" },
+    callback = function()
+        vim.opt_local.tabstop = 2
+        vim.opt_local.shiftwidth = 2
+        vim.opt_local.expandtab = true
+    end
 })
 
 ------------------------------
@@ -173,7 +177,7 @@ require("lazy").setup({
 
         dependencies = {
             { "williamboman/mason.nvim", config = true, opts = { } },
-            "williamboman/mason-lspconfig.nvim"
+            "williamboman/mason-lspconfig.nvim",
         },
 
         config = function()
@@ -192,10 +196,10 @@ require("lazy").setup({
                     vim.keymap.set("n", "<leader>D", require("telescope.builtin").lsp_type_definitions, { buffer = event.buf, desc = "LSP: Type [D]efinition" })
                     vim.keymap.set("n", "<leader>ds", require("telescope.builtin").lsp_document_symbols, { buffer = event.buf, desc = "LSP: [D]ocument [S]ymbols" })
                     vim.keymap.set("n", "<leader>ws", require("telescope.builtin").lsp_dynamic_workspace_symbols, { buffer = event.buf, desc = "LSP: [W]orkspace [S]ymbols" })
-                    -- vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { buffer = event.buf, desc = "LSP: [R]e[n]ame" })
-                    -- vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP: [C]ode [A]ction" })
-                    -- vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = event.buf, desc = "LSP: Hover Documentation" })
-                    -- vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = event.buf, desc = "LSP: [G]oto [D]eclaration" })
+                    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { buffer = event.buf, desc = "LSP: [R]e[n]ame" })
+                    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP: [C]ode [A]ction" })
+                    vim.keymap.set("n", "gh", vim.lsp.buf.hover, { buffer = event.buf, desc = "LSP: Hover Documentation" })
+                    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = event.buf, desc = "LSP: [G]oto [D]eclaration" })
 
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
                     if client and client.server_capabilities.documentHighlightProvider then
@@ -230,34 +234,78 @@ require("lazy").setup({
                     settings = {
                         Lua = {
                             diagnostics = { globals = { "vim" } },
-                            runtime = { version = "LuaJIT", },
-                            workspace = { library = vim.api.nvim_get_runtime_file("", true) },
+                            runtime = { version = "LuaJIT" },
+                            workspace = {
+                                library = {
+                                    [vim.fn.expand("$VIMRUNTIME/lua")] = true,
+                                    [vim.fn.expand("$VIMRUNTIME/lua/vim/lsp")] = true,
+                                },
+                                checkThirdParty = false,
+                            },
                             telemetry = { enable = false },
-                            completion = { callsnipet = "Replace" }
+                            completion = { callsnippet = "Replace" }
                         }
-                    }
+                    },
                 },
                 pyright = { },
                 gopls = { },
                 jsonls = { },
-                tsserver = { },
-                bashls = { }
+                bashls = { },
+                ts_ls = {
+                    settings = {
+                        typescript = {
+                            inlayHints = {
+                                includeInlayParameterNameHints = 'all',
+                                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                                includeInlayFunctionParameterTypeHints = true,
+                                includeInlayVariableTypeHints = true,
+                                includeInlayPropertyDeclarationTypeHints = true,
+                                includeInlayFunctionLikeReturnTypeHints = true,
+                                includeInlayEnumMemberValueHints = true,
+                            }
+                        },
+                        javascript = {
+                            inlayHints = {
+                                includeInlayParameterNameHints = 'all',
+                                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+                                includeInlayFunctionParameterTypeHints = true,
+                                includeInlayVariableTypeHints = true,
+                                includeInlayPropertyDeclarationTypeHints = true,
+                                includeInlayFunctionLikeReturnTypeHints = true,
+                                includeInlayEnumMemberValueHints = true,
+                            }
+                        }
+                    }
+                },
+                tailwindcss = {
+                    settings = {
+                        tailwindCSS = {
+                            experimental = {
+                                classRegex = {
+                                    "tw`([^`]*)",
+                                    "tw\\.[^`]+`([^`]*)`",
+                                    "tw\\(.*?\\).*?`([^`]*)",
+                                    "cn\\(([^)]*)\\)"
+                                }
+                            }
+                        }
+                    }
+                },
+                eslint = { }
             }
 
-            local ensure_installed = vim.tbl_keys(servers or { })
-            vim.list_extend(ensure_installed, {
-                "stylua", -- Used to format Lua code
+            require("mason-lspconfig").setup({
+                ensure_installed = vim.tbl_keys(servers),
+                automatic_installation = true
             })
 
-            require("mason-lspconfig").setup {
-                handlers = {
-                    function(server_name)
-                        local server = servers[server_name] or { }
-                        server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
+            require("mason-lspconfig").setup_handlers({
+                function(server_name)
+                    local server = servers[server_name] or {}
+                    server.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server.capabilities or {})
                         require("lspconfig")[server_name].setup(server)
-                    end
-                }
-            }
+                end
+            })
         end
     },
     -- Autocompletion
@@ -305,17 +353,49 @@ require("lazy").setup({
         },
 
         config = function()
-            require("telescope").setup { }
+            local telescope = require("telescope")
+            local actions = require("telescope.actions")
 
-            pcall(require("telescope").load_extension, "fzf")
+            telescope.setup {
+                defaults = {
+                    mappings = {
+                        i = {
+                            ["<C-j>"] = actions.move_selection_next,
+                            ["<C-k>"] = actions.move_selection_previous
+                        }
+                    }
+                },
+                pickers = {
+                    find_files = {
+                        hidden = true,
+                        file_ignore_patterns = { "^.git/" }
+                    }
+                },
+                extensions = {
+                    file_browser = {
+                        depth = 1,
+                        auto_depth = true,
+                        hidden = true,
+                        respect_gitignore = false,
+                        grouped = true,
+                        previewer = true,
+                        hijack_netrw = true
+                    }
+                }
+            }
 
-            -- vim.keymap.set("n", "<leader>ff", require("telescope.builtin").find_files, { desc = "Find files" })
-            vim.keymap.set("n", "<leader>ff", function() require("telescope").extensions.file_browser.file_browser() end, { desc = "File browser" })
-            vim.keymap.set("n", "<leader>fb", require("telescope.builtin").buffers, { desc = "Find buffers" })
-            vim.keymap.set("n", "<leader>fd", require("telescope.builtin").diagnostics, { desc = "Find diagnostics" })
-            vim.keymap.set("n", "<leader>fk", require("telescope.builtin").keymaps, { desc = "Find keymaps" })
-            vim.keymap.set("n", "<leader>fh", require("telescope.builtin").help_tags, { desc = "Find help" })
-            vim.keymap.set("n", "<leader>fg", require("telescope.builtin").live_grep, { desc = "Live grep" })
+            telescope.load_extension("fzf")
+            telescope.load_extension("file_browser")
+
+            local builtin = require("telescope.builtin")
+
+            vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find files" })
+            vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find buffers" })
+            vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "Find diagnostics" })
+            vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Find keymaps" })
+            vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Find help" })
+            vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Live grep" })
+            vim.keymap.set("n", "<leader>fe", function() telescope.extensions.file_browser.file_browser() end, { desc = "File browser" })
         end
     },
     -- Comment
@@ -604,7 +684,22 @@ require("lazy").setup({
         },
         config = function()
             require("nvim-treesitter.configs").setup {
-                ensure_installed = { "lua", "markdown", "markdown_inline", "python", "go", "vimdoc", "vim" },
+                ensure_installed = {
+                    "lua",
+                    "markdown",
+                    "markdown_inline",
+                    "python",
+                    "go",
+                    "vimdoc",
+                    "vim",
+                    "javascript",
+                    "typescript",
+                    "tsx",
+                    "css",
+                    "json",
+                    "html",
+                    "regex"
+                },
                 auto_install = true,
                 sync_install = false,
                 ignore_install = { },
@@ -674,6 +769,20 @@ require("lazy").setup({
                     view = "cmdline"
                 },
             }
+        end
+    },
+    -- Color Highlighting
+    {
+        "norcalli/nvim-colorizer.lua",
+        config = function()
+            require('colorizer').setup({
+                'css',
+                'javascript',
+                'typescript',
+                'javascriptreact',
+                'typescriptreact',
+                html = { mode = 'foreground' }
+            })
         end
     }
 })
