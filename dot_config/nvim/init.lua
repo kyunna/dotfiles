@@ -121,12 +121,15 @@ vim.api.nvim_create_autocmd("BufReadPost", {
         end
     end
 })
--- ColorSchme for transparent background
+-- ColorScheme settings:
 vim.api.nvim_create_autocmd("ColorScheme", {
-  pattern = "*",
-  callback = function()
-    vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
-  end
+   pattern = "*",
+   callback = function()
+       -- Sign column (gutter area)
+       vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
+       -- Window separator lines
+       vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#9ece6a" }) -- Light Green
+   end
 })
 -- JavaScript/TypeScript file settings
 vim.api.nvim_create_autocmd("FileType", {
