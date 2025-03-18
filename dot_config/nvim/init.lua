@@ -66,8 +66,6 @@ vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
 vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
 
 -- Move lines
-vim.keymap.set("n", "<S-j>", ":m .+1<CR>==", { desc = "Move down", remap = false, silent = true })
-vim.keymap.set("n", "<S-k>", ":m .-2<CR>==", { desc = "Move up", remap = false, silent = true })
 vim.keymap.set("v", "<S-j>", ":m '>+1<cr>gv=gv", { desc = "Move down", remap = false, silent = true })
 vim.keymap.set("v", "<S-k>", ":m '<-2<cr>gv=gv", { desc = "Move up", remap = false, silent = true })
 
