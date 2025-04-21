@@ -127,6 +127,11 @@ vim.api.nvim_create_autocmd("ColorScheme", {
        vim.api.nvim_set_hl(0, "SignColumn", { bg = "none" })
        -- Window separator lines
        vim.api.nvim_set_hl(0, "WinSeparator", { fg = "#9ece6a" }) -- Light Green
+       -- Transparent background for lualine and navic
+       vim.api.nvim_set_hl(0, "WinBar", { bg = "NONE" })
+       vim.api.nvim_set_hl(0, "WinBarNC", { bg = "NONE" })
+       vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE" })
+       vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE" })
    end
 })
 -- JavaScript/TypeScript file settings
