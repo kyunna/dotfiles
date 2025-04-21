@@ -1,0 +1,46 @@
+function svim
+    if test (count $argv) -eq 0
+        echo "Usage: svim <filename>"
+        return 1
+    end
+
+    set -l file $argv[1]
+    set -l nvim_path (command -v nvim)
+    set -l delta_path (command -v delta)
+
+    if test -z "$nvim_path"
+        echo "nvim not found. Please install nvim."
+        return 1
+    end
+
+    # Create temporary file
+    set -l tmpfile (mktemp -t svim-orig.XXXXXXXX)
+
+    umask 077
+    sudo cp $file $tmpfile
+
+    # Edit file depending on OS
+    {{- if eq .chezmoi.os "darwin" }}
+    EDITOR="$nvim_path -c 'lua vim.notify(\"⚡ Editing system file: $file\", vim.log.levels.WARN)'" sudo -e $file
+    {{- else if eq .chezmoi.os "linux" }}
+    EDITOR="$nvim_path -c 'lua vim.notify(\"⚡ Editing system file: $file\", vim.log.levels.WARN)'" sudoedit $file
+    {{- else }}
+    echo "Unsupported OS: {{ .chezmoi.os }}" >&2
+    return 1
+    {{- end }}
+
+    # Compare after editing
+    if not sudo diff -q $tmpfile $file >/dev/null
+        echo ""
+        if test -n "$delta_path"
+            echo "=== Changes Detected (using delta) ==="
+            sudo $delta_path $tmpfile $file
+        else
+            echo "=== Changes Detected ==="
+            sudo diff -u $tmpfile $file
+        end
+        echo ""
+    end
+
+    rm -f $tmpfile
+end
