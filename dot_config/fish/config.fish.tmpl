@@ -13,10 +13,6 @@ if status is-interactive
     {{- end }}
 
     ### Basic Tools Configuration ###
-    # Default shell
-    if type -q fish
-        set -gx SHELL (which fish)
-    end
     # Editor and common command aliases
     if type -q nvim
         set -gx EDITOR nvim
