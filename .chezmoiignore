@@ -6,6 +6,7 @@ bootstrap.sh
     "nvim" ".config/nvim/"
     "fish" ".config/fish/"
     "alacritty" ".config/alacritty/"
+    "ghostty" ".config/ghostty/"
     "git" ".gitconfig"
 }}
 {{ $current_os := .chezmoi.os }}
