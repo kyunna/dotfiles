@@ -19,11 +19,14 @@ function svim
     umask 077
     sudo cp $file $tmpfile
 
+    # Create notify command that runs after UI init
+    set -l notify_cmd "lua vim.defer_fn(function() vim.notify('⚡ Editing system file: $file', vim.log.levels.WARN) end, 200)"
+
     # Edit file depending on OS
     {{- if eq .chezmoi.os "darwin" }}
-    EDITOR="$nvim_path -c 'lua vim.notify(\"⚡ Editing system file: $file\", vim.log.levels.WARN)'" sudo -e $file
+    EDITOR="$nvim_path -c \"$notify_cmd\"" sudo -e $file
     {{- else if eq .chezmoi.os "linux" }}
-    EDITOR="$nvim_path -c 'lua vim.notify(\"⚡ Editing system file: $file\", vim.log.levels.WARN)'" sudoedit $file
+    EDITOR="$nvim_path -c \"$notify_cmd\"" sudoedit $file
     {{- else }}
     echo "Unsupported OS: {{ .chezmoi.os }}" >&2
     return 1

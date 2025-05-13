@@ -781,8 +781,19 @@ require("lazy").setup({
             config = function()
                 require("noice").setup({
                     cmdline = {
-                        view = "cmdline"
+                        view = "cmdline",
                     },
+                      messages = {
+                          view = "notify",
+                          view_error = "notify",
+                          view_warn = "notify",
+                          view_history = "messages",
+                          view_search = "virtualtext",
+                      },
+                      notify = {
+                          enabled = true,
+                          view = "notify",
+                      },
                 })
                 vim.keymap.set("n", "<leader>nh", function() require("noice").cmd("history") end, { desc = "Noice history" })
                 vim.keymap.set("n", "<leader>nl", function() require("noice").cmd("last") end, { desc = "Noice last" })
