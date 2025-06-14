@@ -334,20 +334,39 @@ require("lazy").setup({
         },
 
         config = function()
-            require("cmp").setup {
+            local cmp = require("cmp")
+            local luasnip = require("luasnip")
+
+            cmp.setup {
                 snippet = {
                     expand = function(args)
-                        require("luasnip").lsp_expand(args.body)
+                        luasnip.lsp_expand(args.body)
                     end
                 },
-                mapping = require("cmp").mapping.preset.insert {
-                    ["<C-d>"] = require("cmp").mapping.scroll_docs(4),
-                    ["<C-u>"] = require("cmp").mapping.scroll_docs(-4),
-                    ["<C-f>"] = require("cmp").mapping.scroll_docs(8),
-                    ["<C-b>"] = require("cmp").mapping.scroll_docs(-8),
-                    ["<C-y>"] = require("cmp").mapping.confirm({ select = true })
+                mapping = cmp.mapping.preset.insert {
+                    ["<C-d>"] = cmp.mapping.scroll_docs(4),
+                    ["<C-u>"] = cmp.mapping.scroll_docs(-4),
+                    ["<CR>"] = cmp.mapping.confirm({ select = false }),
+                    ["<Tab>"] = cmp.mapping(function(fallback)
+                        if cmp.visible() then
+                            cmp.select_next_item()
+                        elseif luasnip.expand_or_jumpable() then
+                            luasnip.expand_or_jump()
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s", desc = "Next item / Snippet jump forward" }),
+                    ["<S-Tab>"] = cmp.mapping(function(fallback)
+                        if cmp.visible() then
+                            cmp.select_prev_item()
+                        elseif luasnip.jumpable(-1) then
+                            luasnip.jump(-1)
+                        else
+                            fallback()
+                        end
+                    end, { "i", "s", desc = "Prev item / Snippet jump backward" }),
                 },
-                sources = require("cmp").config.sources {
+                sources = cmp.config.sources {
                     { name = "nvim_lsp" },
                     { name = "path" },
                     { name = "buffer" },
