@@ -53,7 +53,7 @@ vim.keymap.set("n", "<leader>\"", "<C-W>s", { desc = "Split window below", remap
 vim.keymap.set("n", "<leader>%", "<C-W>v", { desc = "Split window right", remap = true })
 
 -- Diagnostic
-vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic message" })
+vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostics under cursor" })
 vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1 }) end, { desc = "Prev diagnostic" })
 vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1 }) end, { desc = "Next diagnostic" })
 vim.keymap.set("n", "[e", function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR }) end, { desc = "Prev error" })
@@ -204,10 +204,10 @@ require("lazy").setup({
                 callback = function(event)
                     vim.keymap.set("n", "gd", require("telescope.builtin").lsp_definitions, { buffer = event.buf, desc = "LSP: [G]oto [D]efinition" })
                     vim.keymap.set("n", "gr", require("telescope.builtin").lsp_references, { buffer = event.buf, desc = "LSP: [G]oto [R]eferences" })
-                    vim.keymap.set("n", "gI", require("telescope.builtin").lsp_implementations, { buffer = event.buf, desc = "LSP: [G]oto [I]mplementation" })
-                    vim.keymap.set("n", "<leader>D", require("telescope.builtin").lsp_type_definitions, { buffer = event.buf, desc = "LSP: Type [D]efinition" })
-                    vim.keymap.set("n", "<leader>ds", require("telescope.builtin").lsp_document_symbols, { buffer = event.buf, desc = "LSP: [D]ocument [S]ymbols" })
-                    vim.keymap.set("n", "<leader>ws", require("telescope.builtin").lsp_dynamic_workspace_symbols, { buffer = event.buf, desc = "LSP: [W]orkspace [S]ymbols" })
+                    vim.keymap.set("n", "gi", require("telescope.builtin").lsp_implementations, { buffer = event.buf, desc = "LSP: [G]oto [I]mplementation" })
+                    vim.keymap.set("n", "<leader>st", require("telescope.builtin").lsp_type_definitions, { buffer = event.buf, desc = "LSP: [S]ymbols (type definition)" })
+                    vim.keymap.set("n", "<leader>sd", require("telescope.builtin").lsp_document_symbols, { buffer = event.buf, desc = "LSP: [S]ymbols (document)" })
+                    vim.keymap.set("n", "<leader>sw", require("telescope.builtin").lsp_dynamic_workspace_symbols, { buffer = event.buf, desc = "LSP: [S]ymbols (workspace)" })
                     vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { buffer = event.buf, desc = "LSP: [R]e[n]ame" })
                     vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP: [C]ode [A]ction" })
                     vim.keymap.set("v", "<leader>ca", vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP: [C]ode [A]ction" })
