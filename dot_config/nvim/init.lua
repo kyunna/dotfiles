@@ -52,25 +52,8 @@ vim.keymap.set("n", "<S-Right>", "<cmd>vertical resize +2<CR>", { desc = "Increa
 vim.keymap.set("n", "<leader>\"", "<C-W>s", { desc = "Split window below", remap = true })
 vim.keymap.set("n", "<leader>%", "<C-W>v", { desc = "Split window right", remap = true })
 
--- Diagnostic
-vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostics under cursor" })
-vim.keymap.set("n", "[d", function() vim.diagnostic.jump({ count = -1 }) end, { desc = "Prev diagnostic" })
-vim.keymap.set("n", "]d", function() vim.diagnostic.jump({ count = 1 }) end, { desc = "Next diagnostic" })
-vim.keymap.set("n", "[e", function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.ERROR }) end, { desc = "Prev error" })
-vim.keymap.set("n", "]e", function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.ERROR }) end, { desc = "Next error" })
-vim.keymap.set("n", "[w", function() vim.diagnostic.jump({ count = -1, severity = vim.diagnostic.severity.WARN }) end, { desc = "Prev warning" })
-vim.keymap.set("n", "]w", function() vim.diagnostic.jump({ count = 1, severity = vim.diagnostic.severity.WARN }) end, { desc = "Next warning" })
-
--- Buffers
-vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
-vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
-
--- Move lines
-vim.keymap.set("v", "<S-j>", ":m '>+1<cr>gv=gv", { desc = "Move down", remap = false, silent = true })
-vim.keymap.set("v", "<S-k>", ":m '<-2<cr>gv=gv", { desc = "Move up", remap = false, silent = true })
-
--- Clear search with <esc>
-vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<CR><esc>", { desc = "Escape and clear hlsearch" })
+-- Diagnostic 
+vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostics at cursor" })
 
 -- Copy diagnostic to clipboard
 function CopyDiagnosticToClipboard()
@@ -91,6 +74,17 @@ end
 
 vim.api.nvim_create_user_command("CopyDiagnostic", CopyDiagnosticToClipboard, { })
 vim.api.nvim_set_keymap("n", "<leader>cd", ":CopyDiagnostic<CR>", { noremap = true, silent = true })
+
+-- Buffers
+vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
+vim.keymap.set("n", "<S-l>", "<cmd>bnext<cr>", { desc = "Next Buffer" })
+
+-- Move lines
+vim.keymap.set("v", "<S-j>", ":m '>+1<cr>gv=gv", { desc = "Move down", remap = false, silent = true })
+vim.keymap.set("v", "<S-k>", ":m '<-2<cr>gv=gv", { desc = "Move up", remap = false, silent = true })
+
+-- Clear search with <esc>
+vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<CR><esc>", { desc = "Escape and clear hlsearch" })
 
 ------------------------------
 -- Auto commands 
