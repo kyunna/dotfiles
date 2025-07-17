@@ -43,29 +43,6 @@ setup_macos_defaults() {
     echo "🔧 Configuring macOS defaults..."
     local exit_status=0
 
-    # Setup input source shortcut
-    echo "⌨️ Setting up input source shortcut..."
-    if ! /usr/libexec/PlistBuddy -c "Print :AppleSymbolicHotKeys:61:value:parameters:2" ~/Library/Preferences/com.apple.symbolichotkeys.plist 2>/dev/null | grep -q "131072"; then
-        defaults write com.apple.symbolichotkeys.plist AppleSymbolicHotKeys -dict-add 61 "
-        <dict>
-            <key>enabled</key><true/>
-            <key>value</key>
-                <dict>
-                <key>type</key><string>standard</string>
-                <key>parameters</key>
-                <array>
-                    <integer>32</integer>
-                    <integer>49</integer>
-                    <integer>131072</integer>
-                </array>
-                </dict>
-        </dict>
-        " || exit_status=$?
-        echo "✅ Input source shortcut set to Shift+Space"
-    else
-        echo "✅ Input source shortcut already configured"
-    fi
-
     # Setup Dock
     echo "🖥️ Configuring Dock..."
     current_autohide=$(defaults read com.apple.dock autohide 2>/dev/null || echo "")
