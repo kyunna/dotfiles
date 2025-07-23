@@ -8,6 +8,7 @@ bootstrap.sh
     "alacritty" ".config/alacritty/"
     "ghostty" ".config/ghostty/"
     "git" ".gitconfig"
+    "conda" ".condarc"
 }}
 {{ $current_os := .chezmoi.os }}
 {{ $current_username := .chezmoi.username }}
