@@ -34,6 +34,7 @@ if status is-interactive
     # WSL: Redirect SSH commands to Windows
     alias ssh="ssh.exe"
     alias ssh-add="ssh-add.exe"
+    alias sftp="sftp.exe"
     {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
     # Linux: Use 1Password SSH agent
     set -gx SSH_AUTH_SOCK ~/.1password/agent.sock
