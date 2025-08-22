@@ -301,6 +301,16 @@ require("lazy").setup({
                     },
                 },
                 eslint = { },
+                clangd = {
+                    cmd = { "clangd" },
+                    filetypes = { "c", "cpp", "objc", "objcpp" },
+                    root_dir = require("lspconfig.util").root_pattern(".clangd", ".clang-tidy", ".clang-format", "compile_commands.json", "compile_flags.txt", "configure.ac", ".git"),
+                    init_options = {
+                        usePlaceholders = true,
+                        completeUnimported = true,
+                        clangdFileStatus = true,
+                    },
+                },
             }
 
             require("mason-lspconfig").setup({
@@ -728,6 +738,8 @@ require("lazy").setup({
                     "json",
                     "html",
                     "regex",
+                    "c",
+                    "cpp",
                 },
                 auto_install = true,
                 sync_install = false,
