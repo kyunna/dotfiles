@@ -19,3 +19,4 @@ bold-is-bright = true
 copy-on-select = clipboard
 
 quit-after-last-window-closed = true
+keybind = shift+enter=text:\n
