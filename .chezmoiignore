@@ -9,6 +9,7 @@ bootstrap.sh
     "ghostty" ".config/ghostty/"
     "git" ".gitconfig"
     "conda" ".condarc"
+    "tmux" ".tmux.conf"
 }}
 {{ $current_os := .chezmoi.os }}
 {{ $current_username := .chezmoi.username }}
