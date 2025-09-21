@@ -10,6 +10,7 @@ bootstrap.sh
     "git" ".gitconfig"
     "conda" ".condarc"
     "tmux" ".tmux.conf"
+    "starship" ".config/starship.toml"
 }}
 {{ $current_os := .chezmoi.os }}
 {{ $current_username := .chezmoi.username }}
