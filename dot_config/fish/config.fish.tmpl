@@ -85,11 +85,38 @@ if status is-interactive
     # Initialize shell enhancements and tools
     if type -q fzf
         fzf --fish | source
-        set -gx FZF_DEFAULT_OPTS "--height 40% --layout=reverse --border"
+
+        # Base FZF options with preview support
+        set -l fzf_base_opts "--height 40% --layout=reverse --border --style full \
+            --bind 'ctrl-f:preview-page-down,ctrl-b:preview-page-up'"
+        set -l fzf_color_opts "--color 'border:#5f8fb0,label:#d6deeb' \
+            --color 'preview-border:#8e5fd0,preview-label:#d4a5f5' \
+            --color 'list-border:#3d7ea8,list-label:#7db7ff' \
+            --color 'input-border:#6b8f8f,input-label:#b8e673'"
+
+        # Set preview command based on available tools
+        if type -q bat
+            set -l fzf_preview_opts "--preview 'bat --style=numbers --color=always --line-range :100 {}'"
+            set -gx FZF_DEFAULT_OPTS "$fzf_base_opts $fzf_preview_opts $fzf_color_opts"
+        else
+            set -l fzf_preview_opts "--preview 'fzf-preview.sh {}'"
+            set -gx FZF_DEFAULT_OPTS "$fzf_base_opts $fzf_preview_opts $fzf_color_opts"
+        end
+
+        # Ctrl+R (insert command from history) - with no preview
+        set -gx FZF_CTRL_R_OPTS "--no-preview"
+
+        # Alt+C (cd into directory) - with directory preview
+        if type -q lsd
+            set -gx FZF_ALT_C_OPTS "--preview 'lsd -al --tree --color always {} | head -100'"
+        else
+            set -gx FZF_ALT_C_OPTS "--preview 'ls -alh {} | head -100'"
+        end
+
+        # Set default command based on available tools
         if type -q fd
             set -gx FZF_DEFAULT_COMMAND "fd --type f --hidden --follow --exclude .git"
-        end
-        if type -q rg
+        else if type -q rg
             set -gx FZF_DEFAULT_COMMAND "rg --files --hidden --follow --glob '!.git'"
         end
     end
