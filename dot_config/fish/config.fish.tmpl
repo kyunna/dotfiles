@@ -108,7 +108,7 @@ if status is-interactive
 
         # Alt+C (cd into directory) - with directory preview
         if type -q lsd
-            set -gx FZF_ALT_C_OPTS "--preview 'lsd -al --tree --color always {} | head -100'"
+            set -gx FZF_ALT_C_OPTS "--preview 'lsd -al --tree --date + --color always {} | head -100'"
         else
             set -gx FZF_ALT_C_OPTS "--preview 'ls -alh {} | head -100'"
         end
