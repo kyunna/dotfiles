@@ -15,17 +15,7 @@
 [commit]
     gpgsign = true
 
-{{ else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") -}}
-[gpg]
-    format = ssh
-
-[gpg "ssh"]
-    program = "/opt/1Password/op-ssh-sign"
-
-[commit]
-    gpgsign = true
-
-{{ else if and (eq .chezmoi.os "linux") (lookPath "wslpath") -}}
+{{ else if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 {{ $username := (output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" | trim) -}}
 {{ if ne $username "" -}}
 [gpg]
@@ -40,4 +30,14 @@
 [commit]
     gpgsign = true
 {{- end -}}
+
+{{ else if and (eq .chezmoi.os "linux") (stat "/opt/1Password/1password") -}}
+[gpg]
+    format = ssh
+
+[gpg "ssh"]
+    program = "/opt/1Password/op-ssh-sign"
+
+[commit]
+    gpgsign = true
 {{- end -}}

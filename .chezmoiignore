@@ -13,16 +13,23 @@ bootstrap.sh
     "starship" ".config/starship.toml"
 }}
 {{ $current_os := .chezmoi.os }}
-{{ $current_username := .chezmoi.username }}
-{{ if and (eq $current_os "linux") (lookPath "wslpath") }}
-    {{ $current_username := output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" | trim }}
+{{ $is_wsl := false }}
+{{ $win_username := "" }} 
+
+{{ if eq $current_os "linux" }}
+    {{ if (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
+        {{ $is_wsl = true }}
+        {{ $win_username = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "$env:USERNAME" | trim) }}
+        {{ if not $win_username }}{{ $win_username = (output "cmd.exe" "/c" "echo %USERNAME%" | trim) }}{{ end }}
+    {{ end }}
 {{ end }}
+
 {{- range $program, $ignore_path := $programs }}
     {{- if eq $program "1password" }}
         {{- if not (or 
             (and (eq $current_os "darwin") (stat "/Applications/1Password.app"))
-            (and (eq $current_os "linux") (lookPath "wslpath") (stat (joinPath "/mnt/c/Users/" $current_username "/AppData/Local/1Password")))
-            (and (eq $current_os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password"))
+            (and (eq $current_os "linux") (stat "/opt/1Password/1password"))
+            (and $is_wsl (stat (joinPath "/mnt/c" "Users" $win_username "AppData" "Local" "1Password")))
         ) }}
 {{ $ignore_path }}
         {{- end }}

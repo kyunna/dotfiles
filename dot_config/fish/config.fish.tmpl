@@ -33,12 +33,12 @@ if status is-interactive
     {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
     # macOS: Use 1Password SSH agent
     set -gx SSH_AUTH_SOCK ~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock
-    {{- else if and (eq .chezmoi.os "linux") (lookPath "wslpath") }}
+    {{- else if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
     # WSL: Redirect SSH commands to Windows
     alias ssh="ssh.exe"
     alias ssh-add="ssh-add.exe"
     alias sftp="sftp.exe"
-    {{- else if and (eq .chezmoi.os "linux") (not (lookPath "wslpath")) (stat "/opt/1Password/1password") }}
+    {{- else if and (eq .chezmoi.os "linux") (stat "/opt/1Password/1password") }}
     # Linux: Use 1Password SSH agent
     set -gx SSH_AUTH_SOCK ~/.1password/agent.sock
     {{- end }}
