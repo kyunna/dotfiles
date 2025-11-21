@@ -15,14 +15,14 @@
 [commit]
     gpgsign = true
 
-{{ else if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+{{- else if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
 {{ $username := (output "powershell.exe" "-NoProfile" "-Command" "$env:USERNAME" | trim) -}}
 {{ if ne $username "" -}}
 [gpg]
     format = ssh
 
 [gpg "ssh"]
-    program = {{ output "wslpath" "-a" (printf "C:/Users/%s/AppData/Local/1Password/app/8/op-ssh-sign-wsl" $username) | trim | quote }}
+    program = "/mnt/c/Users/{{ $username }}/AppData/Local/Microsoft/WindowsApps/op-ssh-sign-wsl.exe"
 
 [core]
     sshCommand = ssh.exe
