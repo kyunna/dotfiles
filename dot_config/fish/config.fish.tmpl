@@ -48,19 +48,17 @@ if status is-interactive
     {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
     set brew_nvm_path (brew --prefix nvm 2>/dev/null)
     if test -f "$brew_nvm_path/nvm.sh"
-        set -gx NVM_DIR $brew_nvm_path
         function nvm
-            bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
+            bass source $brew_nvm_path/nvm.sh --no-use ';' nvm $argv
         end
-        nvm use --lts --silent
+        nvm use node --silent
     end
     {{- else if and (eq .chezmoi.os "linux") }}
     if test -f ~/.nvm/nvm.sh
-        set -gx NVM_DIR ~/.nvm
         function nvm
-            bass source $NVM_DIR/nvm.sh --no-use ';' nvm $argv
+            bass source ~/.nvm/nvm.sh --no-use ';' nvm $argv
         end
-        nvm use --lts --silent
+        nvm use node --silent
     end
     {{- end }}
 
