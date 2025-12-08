@@ -28,19 +28,25 @@ if status is-interactive
         alias lg="lazygit"
     end
 
+    {{- $isMacOS := and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
+    {{- $isWSL := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
+    {{- $isLinux := and (eq .chezmoi.os "linux") (stat "/opt/1Password/1password") }}
+
+    {{- if or $isMacOS $isWSL $isLinux }}
     ### SSH Agent Configuration ###
     # 1Password SSH agent setup
-    {{- if and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") }}
+    {{- if $isMacOS }}
     # macOS: Use 1Password SSH agent
     set -gx SSH_AUTH_SOCK ~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock
-    {{- else if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
+    {{- else if $isWSL }}
     # WSL: Redirect SSH commands to Windows
     alias ssh="ssh.exe"
     alias ssh-add="ssh-add.exe"
     alias sftp="sftp.exe"
-    {{- else if and (eq .chezmoi.os "linux") (stat "/opt/1Password/1password") }}
+    {{- else if $isLinux }}
     # Linux: Use 1Password SSH agent
     set -gx SSH_AUTH_SOCK ~/.1password/agent.sock
+    {{- end }}
     {{- end }}
 
     ### Development Environment Setup ###
