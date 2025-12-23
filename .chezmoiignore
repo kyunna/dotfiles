@@ -37,3 +37,7 @@ bootstrap.sh
 {{ $ignore_path }}
     {{- end }}
 {{- end }}
+
+{{- if not (and (eq $current_os "darwin") (lookPath "brew")) }}
+.config/fish/conf.d/brew.fish
+{{- end }}

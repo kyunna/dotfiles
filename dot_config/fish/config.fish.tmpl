@@ -8,13 +8,6 @@ if status is-interactive
         fish_add_path ~/.local/bin
     end
 
-    {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
-
-    ### Platform Initialization ###
-    # OS-specific environment setup
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-    {{- end }}
-
     ### Basic Tools Configuration ###
     # Editor and common command aliases
     if type -q nvim
