@@ -52,23 +52,11 @@ if status is-interactive
     {{- end }}
 
     ### Development Environment Setup ###
-    # NVM environment setup
-    {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
-    set brew_nvm_path (brew --prefix nvm 2>/dev/null)
-    if test -f "$brew_nvm_path/nvm.sh"
-        function nvm
-            bass source $brew_nvm_path/nvm.sh --no-use ';' nvm $argv
-        end
-        nvm use node --silent
+    # Volta environment setup
+    if test -d "$HOME/.volta/bin"
+        set -gx VOLTA_HOME "$HOME/.volta"
+        fish_add_path "$HOME/.volta/bin"
     end
-    {{- else if eq .chezmoi.os "linux" }}
-    if test -f ~/.nvm/nvm.sh
-        function nvm
-            bass source ~/.nvm/nvm.sh --no-use ';' nvm $argv
-        end
-        nvm use node --silent
-    end
-    {{- end }}
 
     # Conda environment setup
     {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
