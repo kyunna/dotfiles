@@ -4,8 +4,8 @@ end
 if status is-interactive
     ### Path Configuration ###
     # Add user binary path first to ensure local commands are available
-    if test -d ~/.local/bin
-        fish_add_path ~/.local/bin
+    if test -d "$HOME/.local/bin"
+        fish_add_path "$HOME/.local/bin"
     end
 
     ### Basic Tools Configuration ###
@@ -31,7 +31,7 @@ if status is-interactive
     # 1Password SSH agent setup
     {{- if $isMacOS }}
     # macOS: Use 1Password SSH agent
-    set -gx SSH_AUTH_SOCK ~/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock
+    set -gx SSH_AUTH_SOCK "$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
     {{- else if $isWSL }}
     # WSL: Redirect SSH commands to Windows
     alias ssh="ssh.exe"
@@ -39,7 +39,7 @@ if status is-interactive
     alias sftp="sftp.exe"
     {{- else if $isLinux }}
     # Linux: Use 1Password SSH agent
-    set -gx SSH_AUTH_SOCK ~/.1password/agent.sock
+    set -gx SSH_AUTH_SOCK "$HOME/.1password/agent.sock"
     {{- end }}
 
     {{- end }}
@@ -50,23 +50,6 @@ if status is-interactive
         set -gx VOLTA_HOME "$HOME/.volta"
         fish_add_path "$HOME/.volta/bin"
     end
-
-    # Conda environment setup
-    {{- if and (eq .chezmoi.os "darwin") (lookPath "brew") }}
-    if test -f /opt/homebrew/Caskroom/miniconda/base/bin/conda
-        eval /opt/homebrew/Caskroom/miniconda/base/bin/conda "shell.fish" "hook" $argv | source
-    else if test -f /opt/homebrew/bin/conda
-        eval "/opt/homebrew/bin/conda" "shell.fish" "hook" $argv | source
-    end
-    {{- else if and (eq .chezmoi.os "linux") }} 
-    if test -f ~/miniconda3/bin/conda
-        eval "~/miniconda3/bin/conda" "shell.fish" "hook" $argv | source
-    else if test -f ~/miniconda3/etc/fish/conf.d/conda.fish
-        source ~/miniconda3/etc/fish/conf.d/conda.fish
-    else if test -d ~/miniconda3/bin
-        set -x PATH ~/miniconda3/bin $PATH
-    end
-    {{- end }}
 
     ### Shell Integrations ###
     # Initialize shell enhancements and tools
