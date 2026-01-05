@@ -177,8 +177,8 @@ require("lazy").setup({
         "neovim/nvim-lspconfig",
 
         dependencies = {
-            { "mason-org/mason.nvim", config = true, opts = { }, },
-            { "mason-org/mason-lspconfig.nvim" },
+            { "mason-org/mason.nvim", opts = {} },
+            { "mason-org/mason-lspconfig.nvim", opts = {} },
         },
 
         config = function()
@@ -196,30 +196,31 @@ require("lazy").setup({
             vim.api.nvim_create_autocmd("LspAttach", {
                 group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
                 callback = function(event)
-                    vim.keymap.set("n", "gd", require("telescope.builtin").lsp_definitions, { buffer = event.buf, desc = "LSP: [G]oto [D]efinition" })
-                    vim.keymap.set("n", "gr", require("telescope.builtin").lsp_references, { buffer = event.buf, desc = "LSP: [G]oto [R]eferences" })
-                    vim.keymap.set("n", "gi", require("telescope.builtin").lsp_implementations, { buffer = event.buf, desc = "LSP: [G]oto [I]mplementation" })
-                    vim.keymap.set("n", "<leader>st", require("telescope.builtin").lsp_type_definitions, { buffer = event.buf, desc = "LSP: [S]ymbols (type definition)" })
-                    vim.keymap.set("n", "<leader>sd", require("telescope.builtin").lsp_document_symbols, { buffer = event.buf, desc = "LSP: [S]ymbols (document)" })
-                    vim.keymap.set("n", "<leader>sw", require("telescope.builtin").lsp_dynamic_workspace_symbols, { buffer = event.buf, desc = "LSP: [S]ymbols (workspace)" })
+                    local builtin = require("telescope.builtin")
+                    vim.keymap.set("n", "gd", builtin.lsp_definitions, { buffer = event.buf, desc = "LSP: [G]oto [D]efinition" })
+                    vim.keymap.set("n", "gr", builtin.lsp_references, { buffer = event.buf, desc = "LSP: [G]oto [R]eferences" })
+                    vim.keymap.set("n", "gi", builtin.lsp_implementations, { buffer = event.buf, desc = "LSP: [G]oto [I]mplementation" })
+                    vim.keymap.set("n", "<leader>st", builtin.lsp_type_definitions, { buffer = event.buf, desc = "LSP: [S]ymbols (type definition)" })
+                    vim.keymap.set("n", "<leader>sd", builtin.lsp_document_symbols, { buffer = event.buf, desc = "LSP: [S]ymbols (document)" })
+                    vim.keymap.set("n", "<leader>sw", builtin.lsp_dynamic_workspace_symbols, { buffer = event.buf, desc = "LSP: [S]ymbols (workspace)" })
+
                     vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { buffer = event.buf, desc = "LSP: [R]e[n]ame" })
-                    vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP: [C]ode [A]ction" })
-                    vim.keymap.set("v", "<leader>ca", vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP: [C]ode [A]ction" })
-                    vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = event.buf, desc = "LSP: Hover Documentation" })
+                    vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP: [C]ode [A]ction" })
+                    vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = event.buf, desc = "LSP: Hover" })
                     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = event.buf, desc = "LSP: [G]oto [D]eclaration" })
-                    vim.keymap.set("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, { buffer = event.buf, desc = "LSP: Format Document" })
+                    vim.keymap.set("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, { buffer = event.buf, desc = "LSP: Format" })
 
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
                     if client and client.server_capabilities.documentHighlightProvider then
-                        local highlight_augroup = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
+                        local hl = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
                         vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
                             buffer = event.buf,
-                            group = highlight_augroup,
+                            group = hl,
                             callback = vim.lsp.buf.document_highlight,
                         })
                         vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
                             buffer = event.buf,
-                            group = highlight_augroup,
+                            group = hl,
                             callback = vim.lsp.buf.clear_references,
                         })
                     end
@@ -239,7 +240,6 @@ require("lazy").setup({
 
             local servers = {
                 lua_ls = {
-                    root_dir = require("lspconfig.util").root_pattern(".git", "init.lua", "*.lua") or vim.fn.getcwd(),
                     settings = {
                         Lua = {
                             diagnostics = { globals = { "vim" } },
@@ -255,16 +255,19 @@ require("lazy").setup({
                             completion = { callsnippet = "Replace" },
                         },
                     },
+                    root_markers = { { ".luarc.json", ".luarc.jsonc" }, ".git" },
                 },
-                pyright = { },
-                gopls = { },
-                jsonls = { },
-                bashls = { },
+
+                pyright = {},
+                gopls = {},
+                jsonls = {},
+                bashls = {},
+
                 ts_ls = {
                     settings = {
                         typescript = {
                             inlayHints = {
-                                includeInlayParameterNameHints = 'all',
+                                includeInlayParameterNameHints = "all",
                                 includeInlayParameterNameHintsWhenArgumentMatchesName = false,
                                 includeInlayFunctionParameterTypeHints = true,
                                 includeInlayVariableTypeHints = true,
@@ -275,7 +278,7 @@ require("lazy").setup({
                         },
                         javascript = {
                             inlayHints = {
-                                includeInlayParameterNameHints = 'all',
+                                includeInlayParameterNameHints = "all",
                                 includeInlayParameterNameHintsWhenArgumentMatchesName = false,
                                 includeInlayFunctionParameterTypeHints = true,
                                 includeInlayVariableTypeHints = true,
@@ -285,7 +288,9 @@ require("lazy").setup({
                             },
                         },
                     },
+                    root_markers = { ".git", "package.json", "tsconfig.json", "jsconfig.json" },
                 },
+
                 tailwindcss = {
                     settings = {
                         tailwindCSS = {
@@ -299,29 +304,44 @@ require("lazy").setup({
                             },
                         },
                     },
+                    root_markers = { ".git", "tailwind.config.js", "tailwind.config.ts", "postcss.config.js", "package.json" },
                 },
-                eslint = { },
+
+                eslint = {
+                    root_markers = { ".git", ".eslintrc", ".eslintrc.js", ".eslintrc.cjs", ".eslintrc.json", "eslint.config.js", "package.json" },
+                },
+
                 clangd = {
                     cmd = { "clangd" },
                     filetypes = { "c", "cpp", "objc", "objcpp" },
-                    root_dir = require("lspconfig.util").root_pattern(".clangd", ".clang-tidy", ".clang-format", "compile_commands.json", "compile_flags.txt", "configure.ac", ".git"),
                     init_options = {
                         usePlaceholders = true,
                         completeUnimported = true,
                         clangdFileStatus = true,
                     },
+                    root_markers = {
+                        ".git",
+                        ".clangd",
+                        ".clang-tidy",
+                        ".clang-format",
+                        "compile_commands.json",
+                        "compile_flags.txt",
+                        "configure.ac",
+                    },
                 },
             }
 
+            require("mason").setup()
             require("mason-lspconfig").setup({
                 ensure_installed = vim.tbl_keys(servers),
                 automatic_installation = true,
                 automatic_enable = false,
             })
 
-            for server_name, server_opts in pairs(servers) do
-                server_opts.capabilities = vim.tbl_deep_extend("force", {}, capabilities, server_opts.capabilities or {})
-                require("lspconfig")[server_name].setup(server_opts)
+            for name, opts in pairs(servers) do
+                opts.capabilities = vim.tbl_deep_extend("force", {}, capabilities, opts.capabilities or {})
+                vim.lsp.config(name, opts)
+                vim.lsp.enable(name)
             end
         end,
     },
