@@ -1,30 +1,52 @@
 ------------------------------
 -- Neovim options
 ------------------------------
+-- Leader keys
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 vim.g.have_nerd_font = true
 
-vim.opt.autochdir = true
+-- Clipboard
+vim.opt.clipboard = "unnamedplus"
+if vim.env.SSH_CONNECTION then
+  vim.g.clipboard = {
+    name = "OSC 52",
+    copy = {
+      ["+"] = require("vim.ui.clipboard.osc52").copy "+",
+      ["*"] = require("vim.ui.clipboard.osc52").copy "*",
+    },
+    paste = {
+      ["+"] = function() return vim.split(vim.fn.getreg('"'), "\n") end,
+      ["*"] = function() return vim.split(vim.fn.getreg('"'), "\n") end,
+    },
+  }
+end
 
+-- Working directory
+vim.opt.autochdir = true  -- Auto change to file's directory
+
+-- Line numbers
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.cursorline = true
-vim.opt.scrolloff = 8
+vim.opt.scrolloff = 8  -- Keep 8 lines visible when scrolling
 
+-- Indentation
 vim.opt.tabstop = 4
 vim.opt.softtabstop = 4
 vim.opt.shiftwidth = 4
 vim.opt.expandtab = true
 vim.opt.autoindent = true
-vim.opt.pumheight = 7
+vim.opt.pumheight = 7  -- Popup menu height
 
+-- Line wrapping
 vim.opt.wrap = false
 vim.opt.linebreak = true
 vim.opt.breakindent = true
 vim.opt.breakindentopt = "shift:4"
 
-vim.opt.showmode = false
+-- UI
+vim.opt.showmode = false  -- Hidden (lualine shows mode)
 vim.opt.conceallevel = 2
 
 ------------------------------
