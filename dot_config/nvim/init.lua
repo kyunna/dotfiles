@@ -759,43 +759,69 @@ require("lazy").setup({
     },
     -- Treesitter & Treesitter-context
     {
-        "nvim-treesitter/nvim-treesitter", build = ":TSUpdate",
+        "nvim-treesitter/nvim-treesitter",
+        lazy = false,
+        build = ":TSUpdate",
         dependencies = {
             "nvim-treesitter/nvim-treesitter-context",
         },
         config = function()
-            require("nvim-treesitter.config").setup {
-                ensure_installed = {
+            require("nvim-treesitter").setup({
+                install_dir = vim.fn.stdpath("data") .. "/site",
+            })
+
+            require("nvim-treesitter").install({
+                "lua",
+                "markdown",
+                "markdown_inline",
+                "python",
+                "go",
+                "vimdoc",
+                "vim",
+                "javascript",
+                "typescript",
+                "tsx",
+                "css",
+                "json",
+                "html",
+                "regex",
+                "c",
+                "cpp",
+            })
+
+            vim.api.nvim_create_autocmd("FileType", {
+                pattern = {
                     "lua",
                     "markdown",
-                    "markdown_inline",
                     "python",
                     "go",
-                    "vimdoc",
                     "vim",
+                    "vimdoc",
                     "javascript",
                     "typescript",
-                    "tsx",
+                    "javascriptreact",
+                    "typescriptreact",
                     "css",
+                    "scss",
                     "json",
                     "html",
-                    "regex",
                     "c",
                     "cpp",
+                    "regex",
                 },
-                auto_install = true,
-                sync_install = false,
-                ignore_install = { },
-                highlight = {
-                    enable = true,
-                    additional_vim_regex_highlighting = false,
-                },
-                modules = { },
-            }
-            require("treesitter-context").setup {
+                callback = function()
+                    local buf = vim.api.nvim_get_current_buf()
+                    if vim.treesitter.highlighter and vim.treesitter.highlighter.active[buf] then
+                        return
+                    end
+                    pcall(vim.treesitter.start)
+                end,
+            })
+
+            require("treesitter-context").setup({
                 max_lines = 3,
                 mode = "cursor",
-            }
+            })
         end,
     },
     -- Navic
