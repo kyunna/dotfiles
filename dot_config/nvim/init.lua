@@ -280,7 +280,34 @@ require("lazy").setup({
                     root_markers = { { ".luarc.json", ".luarc.jsonc" }, ".git" },
                 },
 
-                pyright = {},
+                pyright = {
+                    settings = {
+                        python = {
+                            analysis = {
+                                autoSearchPaths = true,
+                                diagnosticMode = "openFilesOnly",
+                                useLibraryCodeForTypes = true,
+                            }
+                        }
+                    },
+                    before_init = function(_, config)
+                        local root = config.root_dir or vim.fn.getcwd()
+                        local venv_paths = {
+                            root .. '/.venv/bin/python',
+                            root .. '/venv/bin/python',
+                        }
+
+                        for _, path in ipairs(venv_paths) do
+                            if vim.fn.filereadable(path) == 1 then
+                                -- config.settings = config.settings or {}
+                                config.settings.python.pythonPath = path
+                                return
+                            end
+                        end
+                    end,
+                    root_markers = { "pyproject.toml", ".git" },
+                },
+
                 gopls = {},
                 jsonls = {},
                 bashls = {},
