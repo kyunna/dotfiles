@@ -261,6 +261,7 @@ require("lazy").setup({
             capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
             local servers = {
+                -- Lua
                 lua_ls = {
                     settings = {
                         Lua = {
@@ -277,9 +278,13 @@ require("lazy").setup({
                             completion = { callsnippet = "Replace" },
                         },
                     },
-                    root_markers = { { ".luarc.json", ".luarc.jsonc" }, ".git" },
+                    root_markers = {
+                        { ".luarc.json", ".luarc.jsonc" },
+                        ".git",
+                    },
                 },
 
+                -- Python
                 pyright = {
                     settings = {
                         python = {
@@ -287,31 +292,83 @@ require("lazy").setup({
                                 autoSearchPaths = true,
                                 diagnosticMode = "openFilesOnly",
                                 useLibraryCodeForTypes = true,
-                            }
-                        }
+                            },
+                        },
                     },
                     before_init = function(_, config)
+                        config.settings = config.settings or {}
+                        config.settings.python = config.settings.python or {}
+
                         local root = config.root_dir or vim.fn.getcwd()
                         local venv_paths = {
-                            root .. '/.venv/bin/python',
-                            root .. '/venv/bin/python',
+                            root .. "/.venv/bin/python",
+                            root .. "/venv/bin/python",
                         }
-
                         for _, path in ipairs(venv_paths) do
                             if vim.fn.filereadable(path) == 1 then
-                                -- config.settings = config.settings or {}
                                 config.settings.python.pythonPath = path
                                 return
                             end
                         end
                     end,
-                    root_markers = { "pyproject.toml", ".git" },
+                    root_markers = {
+                        "pyproject.toml",
+                        ".python-version",
+                        ".git",
+                    },
                 },
 
-                gopls = {},
-                jsonls = {},
-                bashls = {},
+                -- Go
+                gopls = {
+                    settings = {
+                        gopls = {
+                            analyses = {
+                                unusedparams = true,
+                                nilness = true,
+                                unusedwrite = true,
+                                useany = true,
+                            },
+                            staticcheck = true,
+                        },
+                    },
+                    root_markers = {
+                        "go.work",
+                        "go.mod",
+                        ".git",
+                    },
+                },
 
+                -- JSON
+                jsonls = {},  -- defaults
+
+                -- Bash / Shell
+                bashls = {},  -- defaults
+
+                -- YAML
+                yamlls = {
+                    settings = {
+                        yaml = {
+                            keyOrdering = false,
+                        },
+                    },
+                    root_markers = {
+                        ".yamllint",
+                        ".prettierrc",
+                        "package.json",
+                        ".git",
+                    },
+                },
+
+                -- TOML
+                taplo = {
+                    root_markers = {
+                        "taplo.toml",
+                        "Cargo.toml",
+                        ".git",
+                    },
+                },
+
+                -- TS/JS
                 ts_ls = {
                     settings = {
                         typescript = {
@@ -337,9 +394,15 @@ require("lazy").setup({
                             },
                         },
                     },
-                    root_markers = { ".git", "package.json", "tsconfig.json", "jsconfig.json" },
+                    root_markers = {
+                        "tsconfig.json",
+                        "jsconfig.json",
+                        "package.json",
+                        ".git",
+                    },
                 },
 
+                -- Tailwind
                 tailwindcss = {
                     settings = {
                         tailwindCSS = {
@@ -353,13 +416,30 @@ require("lazy").setup({
                             },
                         },
                     },
-                    root_markers = { ".git", "tailwind.config.js", "tailwind.config.ts", "postcss.config.js", "package.json" },
+                    root_markers = {
+                        "tailwind.config.js",
+                        "tailwind.config.ts",
+                        "postcss.config.js",
+                        "postcss.config.ts",
+                        "package.json",
+                        ".git",
+                    },
                 },
 
+                -- ESLint
                 eslint = {
-                    root_markers = { ".git", ".eslintrc", ".eslintrc.js", ".eslintrc.cjs", ".eslintrc.json", "eslint.config.js", "package.json" },
+                    root_markers = {
+                        "eslint.config.js",
+                        ".eslintrc",
+                        ".eslintrc.js",
+                        ".eslintrc.cjs",
+                        ".eslintrc.json",
+                        "package.json",
+                        ".git",
+                    },
                 },
 
+                -- C/C++
                 clangd = {
                     cmd = { "clangd" },
                     filetypes = { "c", "cpp", "objc", "objcpp" },
@@ -369,13 +449,12 @@ require("lazy").setup({
                         clangdFileStatus = true,
                     },
                     root_markers = {
-                        ".git",
+                        "compile_commands.json",
+                        "compile_flags.txt",
                         ".clangd",
                         ".clang-tidy",
                         ".clang-format",
-                        "compile_commands.json",
-                        "compile_flags.txt",
-                        "configure.ac",
+                        ".git",
                     },
                 },
             }
