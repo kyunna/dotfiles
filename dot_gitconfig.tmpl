@@ -40,4 +40,11 @@
 
 [commit]
     gpgsign = true
+
+{{- else if eq .chezmoi.hostname "pppp-mint" -}}
+[gpg]
+    format = ssh
+
+[commit]
+    gpgsign = true
 {{- end -}}
