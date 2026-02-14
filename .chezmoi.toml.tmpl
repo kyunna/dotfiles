@@ -1,4 +1,8 @@
 [data]
 name = "olly"
 email = "olly@pppp.page"
+{{- if eq .chezmoi.hostname "pppp-mint" }}
+signingkey = "/home/olly/.ssh/id_ed25519_github_pppp_sign.pub"
+{{- else }}
 signingkey = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAz0y1k6elxE8ldjnPHS2TLTeSrDCNLMLN8gHtriwCam"
+{{- end }}
