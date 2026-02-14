@@ -1,6 +1,13 @@
+{{- /* ===== Always excluded ===== */ -}}
 README.md
 bootstrap.sh
 
+{{- /* ===== OS-specific exclusions ===== */ -}}
+{{- if not (and (eq $current_os "darwin") (lookPath "brew")) }}
+.config/fish/conf.d/brew.fish
+{{- end }}
+
+{{- /* ===== Program-specific exclusions ===== */ -}}
 {{ $programs := dict 
     "1password" ".config/1Password/"
     "nvim" ".config/nvim/"
@@ -37,6 +44,7 @@ bootstrap.sh
     {{- end }}
 {{- end }}
 
-{{- if not (and (eq $current_os "darwin") (lookPath "brew")) }}
-.config/fish/conf.d/brew.fish
+{{- /* ===== Host-specific exclusions ===== */ -}}
+{{- if ne .chezmoi.hostname "pppp-mint" }}
+.config/fish/functions/server.fish
 {{- end }}
