@@ -1,3 +1,8 @@
+{{- /* ===== Variable declarations ===== */ -}}
+{{ $current_os := .chezmoi.os }}
+{{ $is_wsl := false }}
+{{ $win_username := "" }} 
+
 {{- /* ===== Always excluded ===== */ -}}
 README.md
 bootstrap.sh
@@ -18,9 +23,6 @@ bootstrap.sh
     "tmux" ".tmux.conf"
     "starship" ".config/starship.toml"
 }}
-{{ $current_os := .chezmoi.os }}
-{{ $is_wsl := false }}
-{{ $win_username := "" }} 
 
 {{ if eq $current_os "linux" }}
     {{ if (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
