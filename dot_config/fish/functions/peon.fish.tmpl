@@ -1,0 +1,6 @@
+{{- $script := printf "%s/.claude/hooks/peon-ping/peon.sh" .chezmoi.homeDir -}}
+{{- if isExecutable $script -}}
+function peon
+    command bash {{ $script | quote }} $argv
+end
+{{- end -}}
