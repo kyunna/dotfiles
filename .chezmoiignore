@@ -47,6 +47,8 @@ bootstrap.sh
 {{- end }}
 
 {{- /* ===== Host-specific exclusions ===== */ -}}
-{{- if ne .chezmoi.hostname "pppp-mint" }}
+{{- if eq .chezmoi.hostname "pppp-mint" }}
+.ssh/*.pub
+{{- else }}
 .config/fish/functions/server.fish
 {{- end }}

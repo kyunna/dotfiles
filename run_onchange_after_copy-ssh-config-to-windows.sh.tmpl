@@ -1,0 +1,8 @@
+#!/bin/bash
+# {{ include "private_dot_ssh/private_config.tmpl" | sha256sum }} {{ include ".ssh_data.yaml.age" | sha256sum }}
+{{- if and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
+WIN_SSH_DIR="$(wslpath "$(cmd.exe /C 'echo %USERPROFILE%' 2>/dev/null | tr -d '\r')")/.ssh"
+mkdir -p "$WIN_SSH_DIR"
+cp -f ~/.ssh/config "$WIN_SSH_DIR/config"
+cp -f ~/.ssh/*.pub "$WIN_SSH_DIR/"
+{{- end }}

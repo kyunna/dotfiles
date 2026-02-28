@@ -1,0 +1,23 @@
+{{- $data := joinPath .chezmoi.sourceDir ".ssh_data.yaml.age" | include | decrypt | fromYaml -}}
+
+Host github.com
+    PubkeyAuthentication yes
+    IdentityFile {{ if eq .chezmoi.hostname "pppp-mint" }}{{ $data.mint_github_identity_file }}{{ else }}{{ $data.github_identity_file }}{{ end }}
+{{- if ne .chezmoi.hostname "pppp-mint" }}
+{{- range $data.ssh_hosts }}
+
+Host {{ .alias }}
+    {{- if hasKey . "hostname" }}
+    HostName {{ .hostname }}
+    {{- end }}
+    {{- if hasKey . "user" }}
+    User {{ .user }}
+    {{- end }}
+    PubkeyAuthentication yes
+    IdentityFile {{ .identity_file }}
+{{- end }}
+{{- end }}
+
+Host *
+    PubkeyAuthentication no
+    IdentitiesOnly yes
