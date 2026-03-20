@@ -20,6 +20,9 @@ if status is-interactive
     if type -q lazygit
         alias lg="lazygit"
     end
+    if type -q zellij
+        alias zc="zellij --layout claude"
+    end
 
     {{- $isMacOS := and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") -}}
     {{- $isWSL := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}

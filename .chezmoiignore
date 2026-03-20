@@ -22,15 +22,16 @@ bootstrap.sh
     "git" ".gitconfig"
     "tmux" ".tmux.conf"
     "starship" ".config/starship.toml"
+    "zellij" ".config/zellij/"
 }}
 
-{{ if eq $current_os "linux" }}
-    {{ if (.chezmoi.kernel.osrelease | lower | contains "microsoft") }}
-        {{ $is_wsl = true }}
-        {{ $win_username = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "$env:USERNAME" | trim) }}
-        {{ if not $win_username }}{{ $win_username = (output "cmd.exe" "/c" "echo %USERNAME%" | trim) }}{{ end }}
-    {{ end }}
-{{ end }}
+{{- if eq $current_os "linux" -}}
+    {{- if (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
+        {{- $is_wsl = true -}}
+        {{- $win_username = (output "powershell.exe" "-NoProfile" "-NonInteractive" "-Command" "$env:USERNAME" | trim) -}}
+        {{- if not $win_username -}}{{- $win_username = (output "cmd.exe" "/c" "echo %USERNAME%" | trim) -}}{{- end -}}
+    {{- end -}}
+{{- end -}}
 
 {{- range $program, $ignore_path := $programs }}
     {{- if eq $program "1password" }}
