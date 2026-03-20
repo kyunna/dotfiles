@@ -14,15 +14,16 @@ bootstrap.sh
 
 {{- /* ===== Program-specific exclusions ===== */ -}}
 {{ $programs := dict 
-    "1password" ".config/1Password/"
-    "nvim" ".config/nvim/"
-    "fish" ".config/fish/"
-    "alacritty" ".config/alacritty/"
-    "ghostty" ".config/ghostty/"
-    "git" ".gitconfig"
-    "tmux" ".tmux.conf"
-    "starship" ".config/starship.toml"
-    "zellij" ".config/zellij/"
+    "1password" (list ".config/1Password/")
+    "nvim"      (list ".config/nvim/")
+    "fish"      (list ".config/fish/")
+    "alacritty" (list ".config/alacritty/")
+    "ghostty"   (list ".config/ghostty/")
+    "git"       (list ".gitconfig")
+    "tmux"      (list ".tmux.conf")
+    "starship"  (list ".config/starship.toml")
+    "zellij"    (list ".config/zellij/")
+    "claude"    (list ".claude/settings.json" ".claude/statusline.sh")
 }}
 
 {{- if eq $current_os "linux" -}}
@@ -33,17 +34,21 @@ bootstrap.sh
     {{- end -}}
 {{- end -}}
 
-{{- range $program, $ignore_path := $programs }}
+{{- range $program, $ignore_paths := $programs }}
     {{- if eq $program "1password" }}
         {{- if not (or 
             (and (eq $current_os "darwin") (stat "/Applications/1Password.app"))
             (and (eq $current_os "linux") (stat "/opt/1Password/1password"))
             (and $is_wsl (stat (joinPath "/mnt/c" "Users" $win_username "AppData" "Local" "1Password")))
         ) }}
-{{ $ignore_path }}
+            {{- range $ignore_paths }}
+{{ . }}
+            {{- end }}
         {{- end }}
     {{- else if not (lookPath $program) }}
-{{ $ignore_path }}
+        {{- range $ignore_paths }}
+{{ . }}
+        {{- end }}
     {{- end }}
 {{- end }}
 
