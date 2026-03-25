@@ -260,6 +260,21 @@ require("lazy").setup({
             local capabilities = vim.lsp.protocol.make_client_capabilities()
             capabilities = vim.tbl_deep_extend("force", capabilities, require("cmp_nvim_lsp").default_capabilities())
 
+            local rust_opts = {
+                capabilities = capabilities,
+                settings = {
+                    ["rust-analyzer"] = {
+                        checkOnSave = { command = "clippy" },
+                        cargo = { allFeatures = true },
+                        procMacro = { enable = true },
+                    },
+                },
+                root_markers = { "Cargo.toml", ".git" },
+            }
+
+            vim.lsp.config("rust_analyzer", rust_opts)
+            vim.lsp.enable("rust_analyzer")
+
             local servers = {
                 lua_ls = {
                     settings = {
