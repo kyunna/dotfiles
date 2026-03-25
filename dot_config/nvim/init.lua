@@ -419,11 +419,13 @@ require("lazy").setup({
             "hrsh7th/cmp-buffer",
             "hrsh7th/cmp-nvim-lsp",
             "hrsh7th/cmp-path",
+            { "windwp/nvim-autopairs", opts = {} },
         },
 
         config = function()
             local cmp = require("cmp")
             local luasnip = require("luasnip")
+            local autopairs = require("nvim-autopairs.completion.cmp")
 
             cmp.setup {
                 snippet = {
@@ -434,7 +436,7 @@ require("lazy").setup({
                 mapping = cmp.mapping.preset.insert {
                     ["<C-d>"] = cmp.mapping.scroll_docs(4),
                     ["<C-u>"] = cmp.mapping.scroll_docs(-4),
-                    ["<CR>"] = cmp.mapping.confirm({ select = false }),
+                    ["<CR>"] = cmp.mapping.confirm({ select = true }),
                     ["<Tab>"] = cmp.mapping(function(fallback)
                         if cmp.visible() then
                             cmp.select_next_item()
@@ -463,6 +465,7 @@ require("lazy").setup({
                     format = require("nvim-highlight-colors").format
                 },
             }
+            cmp.event:on("confirm_done", autopairs.on_confirm_done())
         end,
     },
     -- Telescope with fzf-native
