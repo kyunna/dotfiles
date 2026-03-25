@@ -24,30 +24,34 @@ if status is-interactive
         alias zc="zellij --layout claude"
     end
 
-    {{- $isMacOS := and (eq .chezmoi.os "darwin") (stat "/Applications/1Password.app") -}}
+    {{- $isMacOS := and (eq .chezmoi.os "darwin") (stat (joinPath .chezmoi.homeDir ".bitwarden-ssh-agent.sock")) -}}
     {{- $isWSL := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
-    {{- $isLinux := and (eq .chezmoi.os "linux") (stat "/opt/1Password/1password") -}}
+    {{- $isLinux := and (eq .chezmoi.os "linux") (not $isWSL) (stat (joinPath .chezmoi.homeDir ".bitwarden-ssh-agent.sock")) -}}
 
     {{- if or $isMacOS $isWSL $isLinux }}
 
     ### SSH Agent Configuration ###
-    # 1Password SSH agent setup
+    # Bitwarden SSH agent setup
     {{- if $isMacOS }}
-    # macOS: Use 1Password SSH agent
-    set -gx SSH_AUTH_SOCK "$HOME/Library/Group Containers/2BUA8C4S2C.com.1password/t/agent.sock"
+    # macOS: Use Bitwarden SSH agent
+    set -gx SSH_AUTH_SOCK "$HOME/.bitwarden-ssh-agent.sock"
     {{- else if $isWSL }}
     # WSL: Redirect SSH commands to Windows
     alias ssh="ssh.exe"
     alias ssh-add="ssh-add.exe"
     alias sftp="sftp.exe"
     {{- else if $isLinux }}
-    # Linux: Use 1Password SSH agent
-    set -gx SSH_AUTH_SOCK "$HOME/.1password/agent.sock"
+    # Linux: Use Bitwarden SSH agent
+    set -gx SSH_AUTH_SOCK "$HOME/.bitwarden-ssh-agent.sock"
     {{- end }}
 
     {{- end }}
 
     ### Development Environment Setup ###
+    # Rust environment setup
+    if test -d "$HOME/.cargo/bin"
+        fish_add_path "$HOME/.cargo/bin"
+    end
     # Volta environment setup
     if test -d "$HOME/.volta/bin"
         set -gx VOLTA_HOME "$HOME/.volta"
