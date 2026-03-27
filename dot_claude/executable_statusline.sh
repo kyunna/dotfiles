@@ -24,7 +24,9 @@ elif [ "$PCT" -ge 70 ]; then BAR_COLOR="$YELLOW"
 else                         BAR_COLOR="$GREEN"; fi
 
 FILLED=$((PCT / 10)); EMPTY=$((10 - FILLED))
-BAR=$(printf "%${FILLED}s" | tr ' ' '█')$(printf "%${EMPTY}s" | tr ' ' '░')
+printf -v FILLED_PART "%${FILLED}s"
+printf -v EMPTY_PART "%${EMPTY}s"
+BAR="${FILLED_PART// /█}${EMPTY_PART// /░}"
 
 MINS=$((DURATION_MS / 60000))
 SECS=$(((DURATION_MS % 60000) / 1000))
