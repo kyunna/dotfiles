@@ -523,10 +523,6 @@ require("lazy").setup({
             vim.keymap.set("n", "<leader>fe", function() telescope.extensions.file_browser.file_browser() end, { desc = "File browser" })
         end,
     },
-    -- Comment
-    {
-        "numToStr/Comment.nvim", opts = { },
-    },
     -- Toggleterm
     {
         "akinsho/toggleterm.nvim", version = "*",
