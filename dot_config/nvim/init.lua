@@ -78,7 +78,7 @@ vim.keymap.set("n", "<leader>%", "<C-W>v", { desc = "Split window right", remap 
 vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show diagnostics at cursor" })
 
 -- Copy diagnostic to clipboard
-function CopyDiagnosticToClipboard()
+local function CopyDiagnosticToClipboard()
     local bufnr = vim.api.nvim_get_current_buf()
     local pos = vim.api.nvim_win_get_cursor(0)
     local row = pos[1] - 1
@@ -89,13 +89,14 @@ function CopyDiagnosticToClipboard()
         return
     end
 
-    local message = diagnostics[1].message
+    local messages = vim.tbl_map(function(d) return d.message end, diagnostics)
+    local message = table.concat(messages, "\n")
     vim.fn.setreg("+", message, "c")
-    print("Diagnostic copied to clipboard: " .. message)
+    print(#diagnostics .. " diagnostic(s) copied to clipboard")
 end
 
-vim.api.nvim_create_user_command("CopyDiagnostic", CopyDiagnosticToClipboard, { })
-vim.api.nvim_set_keymap("n", "<leader>cd", ":CopyDiagnostic<CR>", { noremap = true, silent = true })
+vim.api.nvim_create_user_command("CopyDiagnostic", CopyDiagnosticToClipboard, {})
+vim.keymap.set("n", "<leader>cd", "<cmd>CopyDiagnostic<CR>", { noremap = true, silent = true, desc = "Copy diagnostic to clipboard" })
 
 -- Buffers
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
@@ -218,22 +219,22 @@ require("lazy").setup({
             vim.api.nvim_create_autocmd("LspAttach", {
                 group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
                 callback = function(event)
-                    local builtin = require("telescope.builtin")
-                    vim.keymap.set("n", "gd", builtin.lsp_definitions, { buffer = event.buf, desc = "LSP: [G]oto [D]efinition" })
-                    vim.keymap.set("n", "gr", builtin.lsp_references, { buffer = event.buf, desc = "LSP: [G]oto [R]eferences" })
-                    vim.keymap.set("n", "gi", builtin.lsp_implementations, { buffer = event.buf, desc = "LSP: [G]oto [I]mplementation" })
-                    vim.keymap.set("n", "<leader>st", builtin.lsp_type_definitions, { buffer = event.buf, desc = "LSP: [S]ymbols (type definition)" })
-                    vim.keymap.set("n", "<leader>sd", builtin.lsp_document_symbols, { buffer = event.buf, desc = "LSP: [S]ymbols (document)" })
-                    vim.keymap.set("n", "<leader>sw", builtin.lsp_dynamic_workspace_symbols, { buffer = event.buf, desc = "LSP: [S]ymbols (workspace)" })
+                    vim.keymap.set("n", "gd", function() Snacks.picker.lsp_definitions() end, { buffer = event.buf, desc = "LSP: [G]oto [D]efinition" })
+                    vim.keymap.set("n", "gr", function() Snacks.picker.lsp_references() end, { buffer = event.buf, desc = "LSP: [G]oto [R]eferences" })
+                    vim.keymap.set("n", "gi", function() Snacks.picker.lsp_implementations() end, { buffer = event.buf, desc = "LSP: [G]oto [I]mplementation" })
+                    vim.keymap.set("n", "<leader>st", function() Snacks.picker.lsp_type_definitions() end, { buffer = event.buf, desc = "LSP: [S]ymbols (type definition)" })
+                    vim.keymap.set("n", "<leader>sd", function() Snacks.picker.lsp_symbols() end, { buffer = event.buf, desc = "LSP: [S]ymbols (document)" })
+                    vim.keymap.set("n", "<leader>sw", function() Snacks.picker.lsp_workspace_symbols() end, { buffer = event.buf, desc = "LSP: [S]ymbols (workspace)" })
 
                     vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { buffer = event.buf, desc = "LSP: [R]e[n]ame" })
                     vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP: [C]ode [A]ction" })
                     vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = event.buf, desc = "LSP: Hover" })
                     vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = event.buf, desc = "LSP: [G]oto [D]eclaration" })
                     vim.keymap.set("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, { buffer = event.buf, desc = "LSP: Format" })
+                    vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
 
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
-                    if client and client.server_capabilities.documentHighlightProvider then
+                    if client and client:supports_method("textDocument/documentHighlight", event.buf) then
                         local hl = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
                         vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
                             buffer = event.buf,
@@ -279,7 +280,7 @@ require("lazy").setup({
                 lua_ls = {
                     settings = {
                         Lua = {
-                            diagnostics = { globals = { "vim" } },
+                            diagnostics = { globals = { "vim", "Snacks" } },
                             runtime = { version = "LuaJIT" },
                             workspace = {
                                 library = {
@@ -289,7 +290,7 @@ require("lazy").setup({
                                 checkThirdParty = false,
                             },
                             telemetry = { enable = false },
-                            completion = { callsnippet = "Replace" },
+                            completion = { callSnippet = "Replace" },
                         },
                     },
                     root_markers = { { ".luarc.json", ".luarc.jsonc" }, ".git" },
@@ -314,7 +315,6 @@ require("lazy").setup({
 
                         for _, path in ipairs(venv_paths) do
                             if vim.fn.filereadable(path) == 1 then
-                                -- config.settings = config.settings or {}
                                 config.settings.python.pythonPath = path
                                 return
                             end
@@ -376,8 +376,6 @@ require("lazy").setup({
                 },
 
                 clangd = {
-                    cmd = { "clangd" },
-                    filetypes = { "c", "cpp", "objc", "objcpp" },
                     init_options = {
                         usePlaceholders = true,
                         completeUnimported = true,
@@ -398,7 +396,6 @@ require("lazy").setup({
             require("mason").setup()
             require("mason-lspconfig").setup({
                 ensure_installed = vim.tbl_keys(servers),
-                automatic_installation = true,
                 automatic_enable = false,
             })
 
@@ -468,146 +465,65 @@ require("lazy").setup({
             cmp.event:on("confirm_done", autopairs.on_confirm_done())
         end,
     },
-    -- Telescope with fzf-native
+    -- Snacks (picker, terminal, indent, lazygit)
     {
-        "nvim-telescope/telescope.nvim", version = "*",
-        dependencies = {
-            { "nvim-lua/plenary.nvim" },
-            { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
-            { "nvim-telescope/telescope-file-browser.nvim" },
-        },
-
-        config = function()
-            local telescope = require("telescope")
-            local actions = require("telescope.actions")
-
-            telescope.setup {
-                defaults = {
-                    mappings = {
-                        i = {
-                            ["<C-j>"] = actions.move_selection_next,
-                            ["<C-k>"] = actions.move_selection_previous,
-                        },
+        "folke/snacks.nvim",
+        priority = 1000,
+        lazy = false,
+        opts = {
+            picker = {
+                sources = {
+                    files = {
+                        hidden = true,
+                        ignored = true,
+                        exclude = { ".git", "node_modules", ".cache" },
                     },
                 },
-                pickers = {
-                    find_files = {
-                        hidden = true,
-                        file_ignore_patterns = { "^.git/", "^node_modules/", "^.cache/" },
-                    },
+            },
+            terminal = {},
+            indent = {
+                indent = { char = "▏" },
+                scope = {
+                    enabled = true,
+                    char = "▏",
                 },
-                extensions = {
-                    file_browser = {
-                        depth = 1,
-                        auto_depth = true,
-                        hidden = true,
-                        respect_gitignore = false,
-                        grouped = true,
-                        previewer = true,
-                        hijack_netrw = true,
-                    }
-                }
-            }
-
-            telescope.load_extension("fzf")
-            telescope.load_extension("file_browser")
-
-            local builtin = require("telescope.builtin")
-
-            vim.keymap.set("n", "<leader>ff", builtin.find_files, { desc = "Find files" })
-            vim.keymap.set("n", "<leader>fb", builtin.buffers, { desc = "Find buffers" })
-            vim.keymap.set("n", "<leader>fd", builtin.diagnostics, { desc = "Find diagnostics" })
-            vim.keymap.set("n", "<leader>fk", builtin.keymaps, { desc = "Find keymaps" })
-            vim.keymap.set("n", "<leader>fh", builtin.help_tags, { desc = "Find help" })
-            vim.keymap.set("n", "<leader>fg", builtin.live_grep, { desc = "Live grep" })
-            vim.keymap.set("n", "<leader>fe", function() telescope.extensions.file_browser.file_browser() end, { desc = "File browser" })
-        end,
-    },
-    -- Toggleterm
-    {
-        "akinsho/toggleterm.nvim", version = "*",
-        config = function()
-            require("toggleterm").setup {
-                size = function(term)
-                    if term.direction == "horizontal" then
-                        return 15
-                    elseif term.direction == "vertical" then
-                        return vim.o.columns * 0.4
-                    else
-                        return 20
-                    end
+                filter = function(buf)
+                    local ft = vim.bo[buf].filetype
+                    local bt = vim.bo[buf].buftype
+                    local excluded_ft = { "lspinfo", "packer", "checkhealth", "man", "gitcommit" }
+                    local excluded_bt = { "terminal", "nofile", "quickfix", "prompt" }
+                    return not vim.tbl_contains(excluded_ft, ft) and not vim.tbl_contains(excluded_bt, bt)
                 end,
-                hide_numbers = true,
-                start_in_insert = true,
-                terminal_mappings = true,
-                persist_size = false,
-                persist_mode = true,
-                close_on_exit = true,
-                shell = vim.o.shell,
-            }
+            },
+            lazygit = {},
+        },
+        config = function(_, opts)
+            require("snacks").setup(opts)
 
-            local Terminal = require("toggleterm.terminal").Terminal
-            local float_term = Terminal:new({ id = 1, direction = "float", hidden = true, float_opts = { border = "curved" }})
-            local horizontal_term = Terminal:new({ id = 2, direction = "horizontal", hidden = true })
-            local vertical_term = Terminal:new({ id = 3, direction = "vertical", hidden = true })
+            -- Picker keymaps
+            vim.keymap.set("n", "<leader>ff", function() Snacks.picker.files() end, { desc = "Find files" })
+            vim.keymap.set("n", "<leader>fb", function() Snacks.picker.buffers() end, { desc = "Find buffers" })
+            vim.keymap.set("n", "<leader>fd", function() Snacks.picker.diagnostics() end, { desc = "Find diagnostics" })
+            vim.keymap.set("n", "<leader>fk", function() Snacks.picker.keymaps() end, { desc = "Find keymaps" })
+            vim.keymap.set("n", "<leader>fh", function() Snacks.picker.help() end, { desc = "Find help" })
+            vim.keymap.set("n", "<leader>fg", function() Snacks.picker.grep() end, { desc = "Live grep" })
+            vim.keymap.set("n", "<leader>fe", function() Snacks.picker.explorer() end, { desc = "File explorer" })
 
-            -- Custom key mappings for terminal navigation
+            -- Float terminal toggle
+            vim.keymap.set({ "n", "t" }, "<C-\\>", function()
+                Snacks.terminal.toggle(nil, { win = { position = "float", border = "rounded" } })
+            end, { desc = "Terminal (Float)", noremap = true, silent = true })
+
+            -- LazyGit
+            vim.keymap.set("n", "<leader>lg", function() Snacks.lazygit() end, { desc = "LazyGit", noremap = true, silent = true })
+
+            -- Terminal: esc to normal mode
             vim.api.nvim_create_autocmd("TermOpen", {
                 pattern = "term://*",
                 callback = function()
-                    local function try_move_from_term(mode_key)
-                        local current_win = vim.api.nvim_get_current_win()
-                        vim.cmd("wincmd " .. mode_key)
-                        local new_win = vim.api.nvim_get_current_win()
-                        if current_win == new_win then
-                            vim.cmd("startinsert")
-                        end
-                    end
-
-                    vim.keymap.set("t", "<esc><esc>", [[<C-\><C-n>]], { desc = "Enter normal mode in terminal", noremap = true, silent = true })
-                    vim.keymap.set("t", "<C-h>", function() try_move_from_term("h") end, { desc = "Go to left window from terminal", noremap = true, silent = true })
-                    vim.keymap.set("t", "<C-j>", function() try_move_from_term("j") end, { desc = "Go to lower window from terminal", noremap = true, silent = true })
-                    vim.keymap.set("t", "<C-k>", function() try_move_from_term("k") end, { desc = "Go to upper window from terminal", noremap = true, silent = true })
-                    vim.keymap.set("t", "<C-l>", function() try_move_from_term("l") end, { desc = "Go to right window from terminal", noremap = true, silent = true })
+                    vim.keymap.set("t", "<esc><esc>", [[<C-\><C-n>]], { desc = "Enter normal mode in terminal", noremap = true, silent = true, buffer = true })
                 end,
             })
-
-            -- Auto-start insert mode
-            vim.api.nvim_create_autocmd({ "TermOpen", "BufEnter" }, {
-                pattern = "term://*toggleterm#*",
-                callback = function()
-                    if vim.bo.filetype == "toggleterm" then
-                        vim.cmd("startinsert")
-                    end
-                end,
-            })
-
-            -- Key mappings to toggle the terminal
-            vim.keymap.set("n", "<C-\\>", function() float_term:toggle() end, { desc = "Terminal (Float)", noremap = true, silent = true })
-            vim.keymap.set("n", "<leader>th", function() horizontal_term:toggle() end, { desc = "Terminal (Horizontal)", noremap = true, silent = true })
-            vim.keymap.set("n", "<leader>tv", function() vertical_term:toggle() end, { desc = "Terminal (Vertical)", noremap = true, silent = true })
-            vim.keymap.set("t", "<C-\\>", function() float_term:toggle() end, { desc = "Terminal (Float)", noremap = true, silent = true })
-            vim.keymap.set("t", "<leader>th", function() horizontal_term:toggle() end, { desc = "Terminal (Horizontal)", noremap = true, silent = true })
-            vim.keymap.set("t", "<leader>tv", function() vertical_term:toggle() end, { desc = "Terminal (Vertical)", noremap = true, silent = true })
-        end,
-    },
-    -- Indent blankline
-    {
-        "lukas-reineke/indent-blankline.nvim", main = "ibl",
-        config = function()
-            require("ibl").setup {
-                indent = {
-                    char = { "▏", "" }
-                },
-                scope = {
-                    show_start = false,
-                    show_end = false
-                },
-                exclude = {
-                    filetypes = { "lspinfo", "packer", "checkhalth", "man", "gitcommit", "TelescopePrompt", "TelescopeResults", "''" },
-                    buftypes = { "terminal", "nofile", "quickfix", "prompt" }
-                },
-            }
         end,
     },
     -- Lualine
@@ -648,7 +564,7 @@ require("lazy").setup({
                     theme = auto_theme_custom,
                     component_separators = { left = "", right = nil },
                     section_separators = { left = "", right = nil },
-                    always_devide_middle = true,
+                    always_divide_middle = true,
                     globalstatus = true,
                 },
                 sections = {
@@ -827,6 +743,7 @@ require("lazy").setup({
                 "regex",
                 "c",
                 "cpp",
+                "rust",
             })
 
             vim.api.nvim_create_autocmd("FileType", {
@@ -847,6 +764,7 @@ require("lazy").setup({
                     "html",
                     "c",
                     "cpp",
+                    "rust",
                     "regex",
                 },
                 callback = function()
@@ -891,46 +809,45 @@ require("lazy").setup({
             vim.api.nvim_set_hl(0, "NavicIconsObject",        { fg = "#7dcfff" }) -- Cyan
             vim.api.nvim_set_hl(0, "NavicIconsKey",           { fg = "#9ece6a" }) -- Light Green
             vim.api.nvim_set_hl(0, "NavicIconsNull",          { fg = "#565f89" }) -- Dark Grey
-                vim.api.nvim_set_hl(0, "NavicIconsEnumMember",    { fg = "#bb9af7" }) -- Periwinkle
-                vim.api.nvim_set_hl(0, "NavicIconsStruct",        { fg = "#ff007c" }) -- Brighter Pink
-                vim.api.nvim_set_hl(0, "NavicIconsEvent",         { fg = "#7aa2f7" }) -- Soft Blue
-                vim.api.nvim_set_hl(0, "NavicIconsOperator",      { fg = "#ff9e64" }) -- Salmon
-                vim.api.nvim_set_hl(0, "NavicIconsTypeParameter", { fg = "#9d7cd8" }) -- Lavender
+            vim.api.nvim_set_hl(0, "NavicIconsEnumMember",    { fg = "#bb9af7" }) -- Periwinkle
+            vim.api.nvim_set_hl(0, "NavicIconsStruct",        { fg = "#ff007c" }) -- Brighter Pink
+            vim.api.nvim_set_hl(0, "NavicIconsEvent",         { fg = "#7aa2f7" }) -- Soft Blue
+            vim.api.nvim_set_hl(0, "NavicIconsOperator",      { fg = "#ff9e64" }) -- Salmon
+            vim.api.nvim_set_hl(0, "NavicIconsTypeParameter", { fg = "#9d7cd8" }) -- Lavender
 
-                require("nvim-navic").setup {
-                    lsp = { auto_attach = true },
-                    highlight = true,
-                    separator = "  ",
-                }
-            end,
+            require("nvim-navic").setup {
+                lsp = { auto_attach = true },
+                highlight = true,
+                separator = "  ",
+            }
+        end,
+    },
+    -- Noice
+    {
+        "folke/noice.nvim",
+        event = "VeryLazy",
+        dependencies = {
+            "MunifTanjim/nui.nvim",
         },
-        -- Noice
-        {
-            "folke/noice.nvim",
-            event = "VeryLazy",
-            dependencies = {
-                "MunifTanjim/nui.nvim",
-            },
-            config = function()
-                require("noice").setup({
-                    cmdline = {
-                        view = "cmdline",
-                    },
-                      messages = {
-                          view = "notify",
-                          view_error = "notify",
-                          view_warn = "notify",
-                          view_history = "messages",
-                          view_search = "virtualtext",
-                      },
-                      notify = {
-                          enabled = true,
-                          view = "notify",
-                      },
-                })
-                vim.keymap.set("n", "<leader>nh", function() require("noice").cmd("history") end, { desc = "Noice history" })
-                vim.keymap.set("n", "<leader>nl", function() require("noice").cmd("last") end, { desc = "Noice last" })
-            end,
+        config = function()
+            require("noice").setup({
+                cmdline = {
+                    view = "cmdline",
+                },
+                messages = {
+                    view = "notify",
+                    view_error = "notify",
+                    view_warn = "notify",
+                    view_history = "messages",
+                    view_search = "virtualtext",
+                },
+                notify = {
+                    view = "notify",
+                },
+            })
+            vim.keymap.set("n", "<leader>nh", function() require("noice").cmd("history") end, { desc = "Noice history" })
+            vim.keymap.set("n", "<leader>nl", function() require("noice").cmd("last") end, { desc = "Noice last" })
+        end,
     },
     -- Color Highlighting
     {
