@@ -23,7 +23,7 @@ bootstrap.sh
     "tmux"      (list ".tmux.conf")
     "starship"  (list ".config/starship.toml")
     "zellij"    (list ".config/zellij/")
-    "claude"    (list ".claude/settings.json" ".claude/statusline.sh")
+    "claude"    (list ".claude/CLAUDE.md" ".claude/settings.json" ".claude/statusline.sh")
 }}
 
 {{- if eq $current_os "linux" -}}
