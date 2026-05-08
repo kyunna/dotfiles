@@ -47,6 +47,10 @@ if status is-interactive
 
     {{- end }}
 
+    ### AI Tools Configuration ###
+    # Disable MCP servers on Claude web version
+    set -gx ENABLE_CLAUDEAI_MCP_SERVERS false
+
     ### Development Environment Setup ###
     # Rust environment setup
     if test -d "$HOME/.cargo/bin"
