@@ -48,8 +48,10 @@ if status is-interactive
     {{- end }}
 
     ### AI Tools Configuration ###
-    # Disable MCP servers on Claude web version
-    set -gx ENABLE_CLAUDEAI_MCP_SERVERS false
+    # Claude Code MCP configuration
+    if type -q claude
+        set -gx ENABLE_CLAUDEAI_MCP_SERVERS false
+    end
 
     ### Development Environment Setup ###
     # Rust environment setup
