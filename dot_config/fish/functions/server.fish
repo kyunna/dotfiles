@@ -60,7 +60,7 @@ end
 function server
     # ==== EDIT THESE LISTS ====
     set -l sys_services  caddy.service tailscaled.service
-    set -l user_services dodobox.service syncthing.service
+    set -l user_services dodobox.service syncthing.service linkwarden.service
     set -l sys_timers
     set -l user_timers  cloudflare-ddns.timer rclone-sync-pkm.timer
     # ==========================
