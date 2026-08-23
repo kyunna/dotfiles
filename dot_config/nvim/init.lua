@@ -9,17 +9,7 @@ vim.g.have_nerd_font = true
 -- Clipboard
 vim.opt.clipboard = ""
 if vim.env.SSH_CONNECTION then
-  vim.g.clipboard = {
-    name = "OSC 52",
-    copy = {
-      ["+"] = require("vim.ui.clipboard.osc52").copy("+"),
-      ["*"] = require("vim.ui.clipboard.osc52").copy("*"),
-    },
-    paste = {
-      ["+"] = function() return vim.split(vim.fn.getreg("+"), "\n") end,
-      ["*"] = function() return vim.split(vim.fn.getreg("*"), "\n") end,
-    },
-  }
+    vim.g.clipboard = "osc52"
 end
 
 -- Working directory
