@@ -96,7 +96,7 @@ local function CopyDiagnosticToClipboard()
 end
 
 vim.api.nvim_create_user_command("CopyDiagnostic", CopyDiagnosticToClipboard, {})
-vim.keymap.set("n", "<leader>cd", "<cmd>CopyDiagnostic<CR>", { noremap = true, silent = true, desc = "Copy diagnostic to clipboard" })
+vim.keymap.set("n", "<leader>cd", "<cmd>CopyDiagnostic<CR>", { silent = true, desc = "Copy diagnostic to clipboard" })
 
 -- Buffers
 vim.keymap.set("n", "<S-h>", "<cmd>bprevious<cr>", { desc = "Prev Buffer" })
@@ -116,7 +116,7 @@ vim.keymap.set({ "i", "n" }, "<esc>", "<cmd>noh<CR><esc>", { desc = "Escape and 
 vim.api.nvim_create_autocmd("TextYankPost", {
     group = vim.api.nvim_create_augroup("highlight-yank", { clear = true }),
     callback = function()
-        vim.highlight.on_yank()
+        vim.hl.on_yank()
     end,
 })
 -- Continue editing
@@ -166,8 +166,7 @@ vim.api.nvim_create_autocmd("FileType", {
 ------------------------------
 -- lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
----@diagnostic disable-next-line: undefined-field
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
+if not vim.uv.fs_stat(lazypath) then
     local lazyrepo = "https://github.com/folke/lazy.nvim.git"
     local out = vim.fn.system({ "git", "clone", "--filter=blob:none", "--branch=stable", lazyrepo, lazypath })
     if vim.v.shell_error ~= 0 then
@@ -219,30 +218,30 @@ require("lazy").setup({
             vim.api.nvim_create_autocmd("LspAttach", {
                 group = vim.api.nvim_create_augroup("kickstart-lsp-attach", { clear = true }),
                 callback = function(event)
-                    vim.keymap.set("n", "gd", function() Snacks.picker.lsp_definitions() end, { buffer = event.buf, desc = "LSP: [G]oto [D]efinition" })
-                    vim.keymap.set("n", "gr", function() Snacks.picker.lsp_references() end, { buffer = event.buf, desc = "LSP: [G]oto [R]eferences" })
-                    vim.keymap.set("n", "gi", function() Snacks.picker.lsp_implementations() end, { buffer = event.buf, desc = "LSP: [G]oto [I]mplementation" })
-                    vim.keymap.set("n", "<leader>st", function() Snacks.picker.lsp_type_definitions() end, { buffer = event.buf, desc = "LSP: [S]ymbols (type definition)" })
-                    vim.keymap.set("n", "<leader>sd", function() Snacks.picker.lsp_symbols() end, { buffer = event.buf, desc = "LSP: [S]ymbols (document)" })
-                    vim.keymap.set("n", "<leader>sw", function() Snacks.picker.lsp_workspace_symbols() end, { buffer = event.buf, desc = "LSP: [S]ymbols (workspace)" })
+                    vim.keymap.set("n", "gd", function() Snacks.picker.lsp_definitions() end, { buf = event.buf, desc = "LSP: [G]oto [D]efinition" })
+                    vim.keymap.set("n", "gr", function() Snacks.picker.lsp_references() end, { buf = event.buf, desc = "LSP: [G]oto [R]eferences" })
+                    vim.keymap.set("n", "gi", function() Snacks.picker.lsp_implementations() end, { buf = event.buf, desc = "LSP: [G]oto [I]mplementation" })
+                    vim.keymap.set("n", "<leader>st", function() Snacks.picker.lsp_type_definitions() end, { buf = event.buf, desc = "LSP: [S]ymbols (type definition)" })
+                    vim.keymap.set("n", "<leader>sd", function() Snacks.picker.lsp_symbols() end, { buf = event.buf, desc = "LSP: [S]ymbols (document)" })
+                    vim.keymap.set("n", "<leader>sw", function() Snacks.picker.lsp_workspace_symbols() end, { buf = event.buf, desc = "LSP: [S]ymbols (workspace)" })
 
-                    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { buffer = event.buf, desc = "LSP: [R]e[n]ame" })
-                    vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { buffer = event.buf, desc = "LSP: [C]ode [A]ction" })
-                    vim.keymap.set("n", "K", vim.lsp.buf.hover, { buffer = event.buf, desc = "LSP: Hover" })
-                    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buffer = event.buf, desc = "LSP: [G]oto [D]eclaration" })
-                    vim.keymap.set("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, { buffer = event.buf, desc = "LSP: Format" })
+                    vim.keymap.set("n", "<leader>rn", vim.lsp.buf.rename, { buf = event.buf, desc = "LSP: [R]e[n]ame" })
+                    vim.keymap.set({ "n", "v" }, "<leader>ca", vim.lsp.buf.code_action, { buf = event.buf, desc = "LSP: [C]ode [A]ction" })
+                    vim.keymap.set("n", "K", vim.lsp.buf.hover, { buf = event.buf, desc = "LSP: Hover" })
+                    vim.keymap.set("n", "gD", vim.lsp.buf.declaration, { buf = event.buf, desc = "LSP: [G]oto [D]eclaration" })
+                    vim.keymap.set("n", "<leader>f", function() vim.lsp.buf.format({ async = true }) end, { buf = event.buf, desc = "LSP: Format" })
                     vim.lsp.inlay_hint.enable(true, { bufnr = event.buf })
 
                     local client = vim.lsp.get_client_by_id(event.data.client_id)
                     if client and client:supports_method("textDocument/documentHighlight", event.buf) then
                         local hl = vim.api.nvim_create_augroup("kickstart-lsp-highlight", { clear = false })
                         vim.api.nvim_create_autocmd({ "CursorHold", "CursorHoldI" }, {
-                            buffer = event.buf,
+                            buf = event.buf,
                             group = hl,
                             callback = vim.lsp.buf.document_highlight,
                         })
                         vim.api.nvim_create_autocmd({ "CursorMoved", "CursorMovedI" }, {
-                            buffer = event.buf,
+                            buf = event.buf,
                             group = hl,
                             callback = vim.lsp.buf.clear_references,
                         })
@@ -254,7 +253,7 @@ require("lazy").setup({
                 group = vim.api.nvim_create_augroup("kickstart-lsp-detach", { clear = true }),
                 callback = function(event)
                     vim.lsp.buf.clear_references()
-                    vim.api.nvim_clear_autocmds { group = "kickstart-lsp-highlight", buffer = event.buf }
+                    vim.api.nvim_clear_autocmds { group = "kickstart-lsp-highlight", buf = event.buf }
                 end,
             })
 
@@ -512,16 +511,16 @@ require("lazy").setup({
             -- Float terminal toggle
             vim.keymap.set({ "n", "t" }, "<C-\\>", function()
                 Snacks.terminal.toggle(nil, { win = { position = "float", border = "rounded" } })
-            end, { desc = "Terminal (Float)", noremap = true, silent = true })
+            end, { desc = "Terminal (Float)", silent = true })
 
             -- LazyGit
-            vim.keymap.set("n", "<leader>lg", function() Snacks.lazygit() end, { desc = "LazyGit", noremap = true, silent = true })
+            vim.keymap.set("n", "<leader>lg", function() Snacks.lazygit() end, { desc = "LazyGit", silent = true })
 
             -- Terminal: esc to normal mode
             vim.api.nvim_create_autocmd("TermOpen", {
                 pattern = "term://*",
                 callback = function()
-                    vim.keymap.set("t", "<esc><esc>", [[<C-\><C-n>]], { desc = "Enter normal mode in terminal", noremap = true, silent = true, buffer = true })
+                    vim.keymap.set("t", "<esc><esc>", [[<C-\><C-n>]], { desc = "Enter normal mode in terminal", silent = true, buf = 0 })
                 end,
             })
         end,
