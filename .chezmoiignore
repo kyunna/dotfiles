@@ -24,6 +24,7 @@ bootstrap.sh
     "starship"  (list ".config/starship.toml")
     "zellij"    (list ".config/zellij/")
     "claude"    (list ".claude/CLAUDE.md" ".claude/settings.json" ".claude/statusline.sh")
+    "kanata"    (list ".config/kanata/config.kbd")
 }}
 
 {{- if eq $current_os "linux" -}}
