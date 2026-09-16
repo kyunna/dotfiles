@@ -1,5 +1,6 @@
 {{- /* ===== Variable declarations ===== */ -}}
 {{ $current_os := .chezmoi.os }}
+{{ $home_dir := .chezmoi.homeDir }}
 {{ $is_wsl := false }}
 {{ $win_username := "" }} 
 
@@ -14,17 +15,18 @@ bootstrap.sh
 
 {{- /* ===== Program-specific exclusions ===== */ -}}
 {{ $programs := dict 
-    "1password" (list ".config/1Password/")
-    "nvim"      (list ".config/nvim/")
-    "fish"      (list ".config/fish/")
-    "alacritty" (list ".config/alacritty/")
-    "ghostty"   (list ".config/ghostty/")
-    "git"       (list ".gitconfig")
-    "tmux"      (list ".tmux.conf")
-    "starship"  (list ".config/starship.toml")
-    "zellij"    (list ".config/zellij/")
-    "claude"    (list ".claude/CLAUDE.md" ".claude/settings.json" ".claude/statusline.sh")
-    "kanata"    (list ".config/kanata/config.kbd")
+    "1password"     (list ".config/1Password/")
+    "nvim"          (list ".config/nvim/")
+    "fish"          (list ".config/fish/")
+    "alacritty"     (list ".config/alacritty/")
+    "ghostty"       (list ".config/ghostty/")
+    "git"           (list ".gitconfig")
+    "tmux"          (list ".tmux.conf")
+    "starship"      (list ".config/starship.toml")
+    "zellij"        (list ".config/zellij/")
+    "claude"        (list ".claude/CLAUDE.md" ".claude/settings.json" ".claude/statusline.sh")
+    "kanata"        (list ".config/kanata/config.kbd")
+    "run-or-raise"  (list ".config/run-or-raise/")
 }}
 
 {{- if eq $current_os "linux" -}}
@@ -46,6 +48,20 @@ bootstrap.sh
 {{ . }}
             {{- end }}
         {{- end }}
+
+    {{- else if eq $program "run-or-raise" }}
+        {{- if not (and
+            (eq $current_os "linux")
+            (or
+                (stat (joinPath $home_dir ".local/share/gnome-shell/extensions/run-or-raise@edvard.cz"))
+                (stat "/usr/share/gnome-shell/extensions/run-or-raise@edvard.cz")
+            )
+        ) }}
+            {{- range $ignore_paths }}
+{{ . }}
+            {{- end }}
+        {{- end }}
+
     {{- else if not (lookPath $program) }}
         {{- range $ignore_paths }}
 {{ . }}
