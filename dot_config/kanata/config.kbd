@@ -8,11 +8,11 @@
 )
 
 (defsrc
-  caps
+  caps ralt
 )
 
 (deflayer base
-  @CAPS
+  @CAPS f19
 )
 
 (defalias
