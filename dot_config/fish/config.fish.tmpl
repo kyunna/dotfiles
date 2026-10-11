@@ -20,10 +20,6 @@ if status is-interactive
     if type -q lazygit
         alias lg="lazygit"
     end
-    if type -q zellij
-        alias zc="zellij --layout claude"
-    end
-
     {{- $isMacOS := and (eq .chezmoi.os "darwin") (stat (joinPath .chezmoi.homeDir ".bitwarden-ssh-agent.sock")) -}}
     {{- $isWSL := and (eq .chezmoi.os "linux") (.chezmoi.kernel.osrelease | lower | contains "microsoft") -}}
     {{- $isLinux := and (eq .chezmoi.os "linux") (not $isWSL) (stat (joinPath .chezmoi.homeDir ".bitwarden-ssh-agent.sock")) -}}
